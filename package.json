@@ -1,0 +1,23 @@
+{
+  "name": "da99's applet.js",
+  "version": "0.0.0",
+  "description": "Logic-less templates to a new level",
+  "main": "applet.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github:da99/applet.js.git"
+  },
+  "keywords": [
+  ],
+  "author": "da99",
+  "license": "MIT",
+  "engines": {
+    "iojs": "^2.3.3"
+  },
+  "devDependencies": {
+    "bower": "^1.4.1",
+    "jshint": "^2.8.0"
+  }
+}
