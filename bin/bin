@@ -2,6 +2,8 @@
 # -*- bash -*-
 #
 #
+action="$1"
+shift
 set -u -e -o pipefail
 
 # ==============================================================
@@ -48,7 +50,8 @@ case "$action" in
       path="${dir}$file"
 
       echo -e "=== $CHANGE ($path)"
-      ( bin/megauni jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
+      echo -n "=== Running jshint: "
+      ( bin/bin jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
 
       echo ""
     done
