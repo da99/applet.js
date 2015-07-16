@@ -2,7 +2,7 @@
 da99's applet.js
 ===================
 
-Inspired by [Mustache]() (i.e. logic-less templates) and [RiotJS](https://muut.com/riotjs/).
+Inspired by [Mustache](https://mustache.github.io/) (i.e. logic-less templates) and [RiotJS](https://muut.com/riotjs/).
 
 
 Install
