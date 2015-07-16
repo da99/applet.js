@@ -153,10 +153,6 @@ Applet.run(function (e) {
 
 }); // === run show_if
 
-if (window.$)
-  $(function () {
-    Applet.run({name: 'compile scripts'});
-  });
 
 
 
