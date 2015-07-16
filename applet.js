@@ -3,36 +3,8 @@
 var Applet = {
 
   stacks : {
+    attrs : {},
     funcs : []
-  },
-
-  append : function (func) {
-    return Applet.stacks.funcs.push(func);
-  },
-
-  attrs : {
-    show_if : function (env) {
-    },
-
-    hide_if : function (env) {
-      return new Error('Not done');
-    },
-
-    template_for : function (env) {
-      return new Error('Not done');
-    },
-
-    "var": function (env) {
-      return new Error('Not done');
-    },
-
-    prepend : function (env) {
-      return new Error('Not done');
-    },
-
-    append : function (env) {
-      return new Error('Not done');
-    }
   },
 
   bool : function (o, key) {
@@ -42,9 +14,6 @@ var Applet = {
     return !!o[key];
   },
 
-  nodes : [
-  ],
-
   log : function (str) {
     if (window.console) {
       return console.log.apply(console, arguments);
@@ -53,63 +22,24 @@ var Applet = {
 
   _id : -1,
 
-  id : function (o, prefix) {
-    if (_.isString(o.id) &&  !_.isEmpty(o.id))
-      return o.id;
+  // Get id or (create id, return it)
+  id : function (raw, prefix) {
+    var o = $(raw);
+    var old = o.attr('id');
 
-    if (o.attr && _.isString(o.attr('id')) && !_.isEmpty(o.attr('id')))
-      return o.attr('id');
+    if (old && !_.isEmpty(old))
+      return old;
 
     Applet._id = Applet._id + 1;
     var new_id = (prefix || 'id_for_applet') + '_' + Applet._id.toString();
-    $(o).attr('id', new_id);
+    o.attr('id', new_id);
     return new_id;
   },
 
-  compile : function () {
-
-    var attr_names = _.compact(_.map(Applet.stacks.funcs, function (f) {
-      f({name: 'find_attr'});
-    }));
-
-    var any_with_attrs   = _.map(attr_names, function (name) {
-      return '*[' + name + ']';
-    }).join(',');
-
-    $('script[type="text/applet"]').each(function (ignore, raw_script) {
-      var script = $(raw_script);
-      var script_id = Applet.id(raw_script);
-
-      $(script.html()).find(any_with_attrs).addBack(any_with_attrs).each(function (ignore, raw) {
-        var dom = $(raw);
-        _.each(attr_names, function (attr) {
-          if (!dom.attr(attr))
-            return;
-          var parent = dom.parent();
-          _.each(Applet.stacks.funcs, function (f) {
-            f({
-              name       : 'raw_node',
-              script     : script,
-              raw_script : raw_script,
-              raw        : raw,
-              $          : dom,
-              val        : dom.attr(attr),
-              is_child   : parent.length > 0,
-              is_parent  : parent.length === 0,
-              append     : Applet.append
-            });
-          });
-        }); // === each attr_names
-      });
-
-    }); // === each script applet
-
-  }, // === compile
-
   run: function (raw_data) {
-    // === first data
-    // === after first data
-    //
+    if (_.isFunction(raw_data))
+      return Applet.stacks.funcs.push(raw_data);
+
     var data = {};
     _.each(raw_data, function (v, k) {
       data[k] = v;
@@ -118,47 +48,114 @@ var Applet = {
     });
 
     _.each(Applet.stacks.funcs, function (f) {
-      f({data: data});
+      f(data);
     });
 
   }
 };
 
+// === compile
 Applet.run(function (e) {
+
+  if (e.name !== 'compile scripts') {
+    return;
+  }
+
+  var list = $('script[type="text/applet"]').not('script.compiled');
+  if (list.length < 1)
+    return;
+
+  var attr_names = _.compact(_.map(Applet.stacks.funcs, function (f) {
+    return f({name: 'attr'});
+  }));
+
+  var any_with_attrs   = _.map(attr_names, function (name) {
+    return '*[' + name + ']';
+  }).join(',');
+
+  _.each(list, function (raw_script) {
+      var script    = $(raw_script);
+      var script_id = Applet.id(raw_script);
+
+      _.each($(script.html()).find(any_with_attrs).addBack(any_with_attrs), function (raw) {
+        var dom    = $(raw);
+        var attrs  = _.reduce(
+          attr_names,
+          function (o, name) {
+            o[name] = dom.attr(name);
+            dom.removeAttr(name);
+            return o;
+          },
+          {}
+        );
+
+        _.each(Applet.stacks.funcs, function (f) {
+          f({
+            name       : 'raw_node',
+            attrs      : attrs,
+            script     : script,
+            raw_script : raw_script,
+            raw        : raw,
+            $          : dom,
+            append     : Applet.append
+          }); // === func
+        }); // === each Applet.stack.funcs
+      });
+
+      script.addClass('compiled');
+  }); // === each script applet
+
+  Applet.run(e);
+}); // == run compile
+
+// === show_if
+Applet.run(function (e) {
+  if (!Applet.stacks.attrs.show_if)
+    Applet.stacks.attrs.show_if = [];
 
   switch (e.name) {
 
-    case 'find_attr':
+    case 'attr':
       return 'show_if';
 
     case 'raw_node':
+      if (!e.attrs.show_if)
+        return;
+
       e.$.hide();
 
       // === Add to dom:
-      if (e.is_parent)
+      if (e.$.parent().length === 0)
         e.script.after(e.$);
+
+      // === Register the node:
+
+      Applet.stacks.attrs.show_if.push({
+        id: Applet.id(e.$),
+        show_if: e.attrs.show_if
+      });
+
       return;
 
-    case 'attr':
-      if (!e.show_if)
-        return;
+    default: // === show time
+      _.each(Applet.stacks.attrs.show_if, function (o) {
+        if (!_.has(e, o.show_if))
+          return;
 
-      if (!_.has(e.data, e.show_if))
-        return;
-
-      if (e.data[e.show_if])
-        $('#' + e.id).show();
-      else
-        $('#' + e.id).hide();
+        if (e[o.show_if])
+          $('#' + o.id).show();
+        else
+          $('#' + o.id).hide();
+      });
       return;
 
   } // === switch e.name
 
-}); // === show_if
+}); // === run show_if
 
 if (window.$)
   $(function () {
-    Applet.compile();
+    Applet.run({name: 'compile scripts'});
   });
 
 
