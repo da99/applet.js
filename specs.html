@@ -5,6 +5,10 @@
     <link href="./css/otfpoc.css" media="all" rel="stylesheet" type="text/css" />
     <link href="./css/MUE.css" media="all" rel="stylesheet" type="text/css" />
     <link href="./css/index.css" media="all" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+      .blue { color: blue; }
+      .bold { font-weight: bold; }
+    </style>
     <title>megaUNI Homepage</title>
   </head>
   <body>
@@ -35,6 +39,22 @@
       </div>
     </script>
   </body>
+
+  <script type="text/applet">
+     <div append="num"></div>
+     <div prepend="num_name"></div>
+
+     <div render="num">
+       <span var="number" class="blue"></span>
+       <br />
+     </div>
+
+     <div render="num_name">
+       <span var="word" class="bold"></span>
+       <br />
+     </div>
+  </script>
+
   <script src="./scripts/jquery/dist/jquery.min.js"></script>
   <script src="./scripts/lodash/lodash.min.js"></script>
   <script src="./applet.js"></script>
