@@ -1,16 +1,26 @@
 <html>
   <head>
+
+    <meta charset="utf-8">
     <link href="./css/vanilla.reset.css" media="all" rel="stylesheet" type="text/css" />
     <link href="./css/fonts.css" media="all" rel="stylesheet" type="text/css" />
     <link href="./css/otfpoc.css" media="all" rel="stylesheet" type="text/css" />
     <link href="./css/MUE.css" media="all" rel="stylesheet" type="text/css" />
     <link href="./css/index.css" media="all" rel="stylesheet" type="text/css" />
+
     <style type="text/css">
       .blue { color: blue; }
       .bold { font-weight: bold; }
     </style>
-    <title>megaUNI Homepage</title>
+
+    <title>Jasmine Spec Runner</title>
+
+
+    <link rel="shortcut icon" type="image/png" href="./scripts/jasmine/images/jasmine_favicon.png">
+    <link rel="stylesheet"                     href="./scripts/jasmine/lib/jasmine-core/jasmine.css">
+
   </head>
+
   <body>
     <script id="Welcome" type="text/applet">
       <div class="block" show_if="logged_in?">
@@ -27,9 +37,13 @@
         </div>
       </div>
     </script>
-    <script id="New_Customer" type="text/applet">      <div class="block" show_if="!logged_in?">
+    <script id="New_Customer" type="text/applet">
+        <div class="block" show_if="!logged_in?">
         <h3>Create a New Account</h3>
-        <div class="content">          <form action="/user" id="create_account" method="post">            <div class="fields">              <div class="field screen_name"><label for="NEW_CUSTOMER_SCREEN_NAME">Screen name:</label><input name="screen_name" type="text" value="" /></div>
+        <div class="content">
+          <form action="/user" id="create_account" method="post">
+            <div class="fields">
+            <div class="field screen_name"><label for="NEW_CUSTOMER_SCREEN_NAME">Screen name:</label><input name="screen_name" type="text" value="" /></div>
               <div class="field pswd"><label for="NEW_CUSTOMER_PASS_PHRASE"><span class="main">Pass phrase</span><span class="sub"> (for better security, use spaces and words)</span><span class="main">:</span></label><input name="pswd" type="password" value="" /></div>
               <div class="field confirm_pass_phrase"><label for="NEW_CUSTOMER_CONFIRM_PASS_PHRASE"><span class="main">Re-type the pass phrase:</span></label><input name="confirm_pass_word" type="password" value="" /></div>
               <div class="buttons"><input name="_csrf" type="hidden" value="{{_csrf}}" /><button class="submit">Create Account</button></div>
@@ -44,19 +58,28 @@
      <div append="num"></div>
      <div prepend="num_name"></div>
 
-     <div render="num" show_if="happy">
-       <span var="number" class="blue"></span>
-       <br />
-     </div>
+     <script type="render/num">
+       <div show_if="happy">
+         <span var="number" class="blue"></span>
+         <br />
+       </div>
+     </script>
 
-     <div render="num_name" show_if="sad">
-       <span var="word" class="bold"></span>
-       <br />
-     </div>
+     <script type="render/num_name">
+       <div show_if="sad">
+         <span var="word" class="bold"></span>
+         <br />
+       </div>
+     </script>
   </script>
+
+  <script src="./scripts/jasmine/lib/jasmine-core/jasmine.js"></script>
+  <script src="./scripts/jasmine/lib/jasmine-core/jasmine-html.js"></script>
+  <script src="./scripts/jasmine/lib/jasmine-core/boot.js"></script>
 
   <script src="./scripts/jquery/dist/jquery.min.js"></script>
   <script src="./scripts/lodash/lodash.min.js"></script>
+
   <script src="./applet.js"></script>
   <script src="./specs.js"></script>
 </html>
