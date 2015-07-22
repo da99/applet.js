@@ -68,11 +68,16 @@ var Applet = {
 
   var node_array = Applet.node_array = function (unknown) {
     var arr = [];
-    $(unknown).each(function (dom) {
-      if (dom.nodeType === 1)
-        arr.push({tag: dom.nodeName, attrs: attrs(dom), special: custom_attrs(dom) });
-      else
-        arr.push({is_node: false, dom: dom });
+    _.each($(unknown), function (dom) {
+      if (dom.nodeType !== 1)
+        return arr.push({is_node: false, dom: dom });
+
+      arr.push({
+        tag    : dom.nodeName,
+        attrs  : attrs(dom),
+        custom : custom_attrs(dom),
+        childs : node_array($(dom).contents())
+      });
     });
 
     return arr;
@@ -256,7 +261,8 @@ var Applet = {
           return;
 
         default: // === show time
-          return;
+          if (true)
+            return;
           _.each(Applet.stacks.attrs.show_if, function (o) {
             if (!_.has(e, o.show_if))
               return;

@@ -42,7 +42,7 @@ case "$action" in
 
 
     echo "=== Watching:"
-    inotifywait --quiet --monitor --event close_write  applet.js  | while read CHANGE
+    inotifywait --quiet --monitor --event close_write  ./  | while read CHANGE
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
@@ -50,10 +50,13 @@ case "$action" in
       path="${dir}$file"
 
       echo -e "=== $CHANGE ($path)"
-      echo -n "=== Running jshint: "
-      ( bin/bin jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
 
-      echo ""
+      if [[ "$file" =~ ".js" ]]; then
+        echo -n "=== Running jshint: "
+        ( bin/bin jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
+
+        echo ""
+      fi
     done
 
     ;;

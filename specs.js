@@ -1,3 +1,6 @@
+"use strict";
+/* jshint undef: true, unused: true */
+/* global Applet, describe, it, expect, beforeEach */
 
 $(function () {
   Applet.run({name: 'compile scripts'});
@@ -36,7 +39,7 @@ describe('custom_attrs:', function () {
   beforeEach(Applet.reset);
 
   it('returns custom attrs of node', function () {
-    Applet.run(function (e) { return 'hide_if'; });
+    Applet.run(function () { return 'hide_if'; });
 
     var result = Applet.custom_attrs($('<div show_if="sad?" hide_if="happy?"></div>')[0]);
     expect(result).toEqual(
@@ -52,3 +55,25 @@ describe('custom_attrs:', function () {
   }); // === it ignores regular attributes
 
 }); // === describe custom_attrs =================
+
+
+describe('node_array:', function () {
+
+  beforeEach(Applet.reset);
+
+  it('returns an Array when passed a String', function () {
+    var arr = Applet.node_array('<div id="111" show_if="happy?"><span></span></div>');
+
+    expect(arr).toEqual([
+      {
+        tag:   'DIV',
+        attrs:  {id: '111'},
+        custom: {show_if: 'happy?'},
+        childs: [
+          {tag: 'SPAN', attrs: {}, custom: {}, childs: []}
+        ]
+      }
+    ]);
+  }); // === it returns an Array when passed a String
+
+}); // === describe node_array =================
