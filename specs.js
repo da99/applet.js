@@ -76,4 +76,11 @@ describe('node_array:', function () {
     ]);
   }); // === it returns an Array when passed a String
 
+  it('returns raw text nodes', function () {
+    var arr = Applet.node_array('<div><span>a<span></span>b</span></div>');
+
+    var result = _.pluck(arr[0].childs[0].childs, 'nodeValue');
+    expect(result).toEqual(['a', undefined, 'b']);
+  }); // === it returns raw text nodes
+
 }); // === describe node_array =================

@@ -70,7 +70,7 @@ var Applet = {
     var arr = [];
     _.each($(unknown), function (dom) {
       if (dom.nodeType !== 1)
-        return arr.push({is_node: false, dom: dom });
+        return arr.push(dom);
 
       arr.push({
         tag    : dom.nodeName,
