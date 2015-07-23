@@ -2,6 +2,7 @@
 
 var Applet = {
   stack : [],
+  links : [],
   _id : -1
 };
 
@@ -35,36 +36,15 @@ var Applet = {
   }; // === id
 
   var attrs = Applet.attrs = function (dom) {
-    var attrs = {};
-    var custom = custom_attrs();
-
-    _.each(dom.attributes, function (o) {
-      if (!_.contains(custom, o.name))
-        attrs[o.name] = o.value;
-    });
-
-    return attrs;
-  };
-
-  var custom_attrs = Applet.custom_attrs = function (dom) {
-    var attrs = [];
-
-    _.each(Applet.stack, function (o) {
-      if (o.name === 'attr')
-        attrs.push(o.value);
-    });
-
-    if (!dom)
-      return attrs;
-
-    var custom = {};
-    _.each(dom.attributes, function (o) {
-      if (_.contains(attrs, o.name))
-        custom[o.name] = o.value;
-    });
-
-    return custom;
-  };
+    return _.reduce(
+      dom.attributes,
+      function (kv, o) {
+        kv[o.name] = o.value;
+        return kv;
+      },
+      {}
+    );
+  }; // === attrs
 
   var node_array = Applet.node_array = function (unknown) {
     var arr = [];
@@ -75,7 +55,7 @@ var Applet = {
       arr.push({
         tag    : dom.nodeName,
         attrs  : attrs(dom),
-        custom : custom_attrs(dom),
+        custom : {},
         childs : node_array($(dom).contents())
       });
     });
@@ -83,71 +63,63 @@ var Applet = {
     return arr;
   };
 
-  var run = Applet.run = function (raw_data, func) {
+  var run = Applet.run = function () {
 
-    // === .run(func{})
-    if (_.isFunction(raw_data) && !func) {
-      func = raw_data;
-      raw_data = null;
+    var msg, func, standard_name;
+    var args = _.toArray(arguments);
+
+    // === .run( 'name' )
+    if (_.isString(args[0]) && args.length === 1) {
+      msg = {name: args[0], data: {}};
+    } else
+
+    // === .run( 'name', {} )
+    if ( _.isString(args[0]) && _.isPlainObject(args[1]) && args.length === 2 ) {
+      msg = {name: args[0], data: args[1]};
+    } else
+
+    // === .run( {...} )
+    if (_.isPlainObject(args[0]) && args.length === 1) {
+      msg = {name: 'data', data: args[0]};
+    } else
+
+    // === .run( func )
+    if (_.isFunction(args[0]) && args.length === 1) {
+      msg = {name: 'new func', data: args[0]};
+    } else {
+      log(args);
+      throw new Error("Unknown args");
     }
 
-    if (func && !raw_data) {
-      var attr = func({name: 'attr'});
-      if (attr)
-        Applet.stack.push({name: 'attr', value: attr});
-      Applet.stack.push({name: 'func', value: func});
-      return Applet;
+    // === Standardize data:
+    if (_.isPlainObject(msg.data))
+      msg.data = _.clone(msg.data);
+
+    // === Standardize name of message:
+    standard_name = _.words(_.trim(msg.name).toLowerCase()).join(' ');
+
+    if (msg.name === 'new func') {
+      Applet.links.push({name: 'func', from: Applet, to: msg.data });
     }
 
-    // === .run('prepend', func {})
-    if (raw_data === "prepend" &&  _.isFunction(func))
-      return Applet.stack.unshift(func);
 
-    // === .run('name');
-    // === .run('name', {});
-    if (_.isString(raw_data) && (!func || _.isPlainObject(func))) {
-      var o = {
-        name: 'before ' + raw_data,
-        data: func
-      };
+    // === Run message:
+    _.detect(['before ', '', 'after '], function (prefix) {
+      msg.name = prefix + standard_name;
+      return _.detect(Applet.links, function (link) {
+        if (link.name !== 'func')
+          return false;
 
-      _.detect(['before ', '', 'after '], function (prefix) {
-        o.name = prefix + raw_data;
-        return _.detect(Applet.stack, function (meta) {
-          if (meta.name !== 'func')
-            return false;
+        var original_name = msg.name;
+        link.to(msg);
 
-          var f = meta.value;
-          var name = o.name;
-          f(o);
-
-          // === Stop running functions
-          //     if names are different.
-          return o.name !== name;
-        });
+        // === Stop running functions
+        //     if names are different.
+        return msg.name !== original_name;
       });
-
-      return;
-    } // === .run('name', {});
-
-    if (!_.isPlainObject(raw_data))
-      throw new Error("Unknown arguments.");
-
-    var data = {};
-
-    _.each(raw_data, function (v, k) {
-      data[k] = v;
-      if (!_.startsWith(k, '!') && !_.has(raw_data, '!' + k))
-        data['!'+k] = !v;
     });
 
-    _.each(Applet.stack, function (f) {
-      if (f.name !== 'func')
-        return;
-      f.value({name: 'data', data: data});
-    });
-
-  }; // === run
+  }; // === func: run
 
 
   // ================= THE CORE =========================
@@ -172,66 +144,32 @@ var Applet = {
       if (e.name !== 'compile scripts')
         return;
 
-      var list = $('script[type="text/applet"]:not(script.compiled)');
-      if (list.length < 1)
+      var scripts = $('script[type="text/applet"]:not(script.compiled)');
+      if (scripts.length < 1)
         return;
 
-      var attr_names = _.compact(
-        _.map(
-          Applet.stacks.all,
-          function (f) { return f.name === 'attr' && f.value; }
-        )
-      );
+      _.each( scripts,
+        function (raw_script) {
+          var contents  = node_array($(raw_script).contents());
+          var script    = $(raw_script);
+          var script_id = id(raw_script);
 
-      _.each(list, function (raw_script) {
-        var contents = _.map($(raw_script).contents(), function (raw_node) {
+          Applet.links.push({
+            name: 'script',
+            from: script_id,
+            to:   contents
+          });
 
-          if (raw_node.nodeType !== 1)
-            return raw_node;
-
-
-          var o = {
-            list : [],
-            pos  : 0
+          var meta = {
+            name       : 'new node',
+            attrs      : attrs,
+            script     : script,
+            raw_script : raw_script,
+            $          : contents,
+            used_funcs : []
           };
 
-          return o.list[o.pos];
-        });
-
-        _.map();
-        contents.each(function (n) {
-          if (n.nodeType === 1) {
-          }
-        });
-
-          var script    = $(raw_script);
-          var script_id = Applet.id(raw_script);
-
-          _.each($(script.html()), function (raw) {
-            var dom    = $(raw);
-            var attrs  = _.reduce(
-              attr_names,
-              function (o, name) {
-                o[name] = dom.attr(name);
-                dom.removeAttr(name);
-                return o;
-              },
-              {}
-            );
-
-            var meta = {
-              name       : 'new node',
-              attrs      : attrs,
-              script     : script,
-              raw_script : raw_script,
-              raw        : raw,
-              $          : dom,
-              used_funcs : []
-            };
-
-            Applet.run(meta);
-
-          }); // === _.each script html find any with attrs
+          Applet.run(meta);
 
           script.addClass('compiled');
       }); // === each script applet
@@ -281,13 +219,12 @@ var Applet = {
 
   // === render
   run(
-    'prepend',
     function (e) {
       switch (e.name) {
         case 'attr':
           return 'render';
 
-        case 'raw node':
+        case 'before raw node':
           e.is_raw = false;
           Applet.log(e);
         break;
