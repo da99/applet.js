@@ -104,7 +104,7 @@ var Applet = {
 
 
     // === Run message:
-    _.detect(['before ', '', 'after '], function (prefix) {
+    _.detect(['before before ', 'before ', '', 'after ', 'after after '], function (prefix) {
       msg.name = prefix + standard_name;
       return _.detect(Applet.links, function (link) {
         if (link.name !== 'func')
@@ -127,11 +127,15 @@ var Applet = {
   // === insert node
   run(
     function (e) {
-      if (e.name !== 'after node')
+      if (e.name !== 'render scripts')
         return;
 
-      if (e.$.parent().length === 0)
-        e.script.after(e.$);
+      _.each(e.data, function (raw_script) {
+        var script = $(raw_script);
+        id(script);
+        (script.contents()).insertBefore();
+        script.addClass('compiled');
+      });
     }
   ); // === insert node
 
@@ -148,34 +152,15 @@ var Applet = {
       if (scripts.length < 1)
         return;
 
-      _.each( scripts,
-        function (raw_script) {
-          var contents  = node_array($(raw_script).contents());
-          var script    = $(raw_script);
-          var script_id = id(raw_script);
+      Applet.run({
+        name       : 'render scripts',
+        dat        : scripts
+      });
 
-          Applet.links.push({
-            name: 'script',
-            from: script_id,
-            to:   contents
-          });
-
-          var meta = {
-            name       : 'new node',
-            attrs      : attrs,
-            script     : script,
-            raw_script : raw_script,
-            $          : contents,
-            used_funcs : []
-          };
-
-          Applet.run(meta);
-
-          script.addClass('compiled');
-      }); // === each script applet
+      script.addClass('compiled');
 
       Applet.run(e);
-    }
+    } // === function
   ); // == run compile
 
   // === show_if
