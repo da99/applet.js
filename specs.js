@@ -5,6 +5,42 @@
 $(function () {
 });
 
+describe('Applet:', function () {
+
+  beforeEach(function () {
+    $('#THE_STAGE').empty();
+    Applet.reset();
+  });
+
+  describe('compiling scripts:', function () {
+
+    it('does not re-evaluate scripts', function () {
+      $('#THE_STAGE').html('<script type="text/applet"><div>OK</div></script>');
+      Applet.run('compile scripts');
+      Applet.run('compile scripts');
+      Applet.run('compile scripts');
+      expect($('#THE_STAGE').html()).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script>');
+    }); // === it does not re-evaluate scripts
+
+    it('keeps evaulating nested scripts until done', function () {
+      $('#THE_STAGE').html(
+        '<script type="text/applet">' +
+          '<script type="text/applet">' +
+            '<script type="text/applet">' +
+            '<div>OK</div>' +
+            '</script>' +
+          '</script>' +
+        '</script>'
+      );
+
+      Applet.run('compile scripts');
+      expect(
+        $('#THE_STAGE').html()
+      ).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script>');
+    }); // === it keeps evaulating nested scripts until done
+  }); // === describe compiling scripts =================
+
+}); // === describe Applet =================
 
 describe('attrs:', function () {
 
@@ -20,7 +56,10 @@ describe('attrs:', function () {
 
 describe('node_array:', function () {
 
-  beforeEach(Applet.reset);
+  beforeEach(function () {
+    $('#THE_STAGE').empty();
+    Applet.reset();
+  });
 
   it('returns an Array when passed a String', function () {
     var arr = Applet.node_array('<div id="111" show_if="happy?"><span></span></div>');
@@ -48,13 +87,3 @@ describe('node_array:', function () {
   }); // === it returns raw text nodes
 
 }); // === describe node_array =================
-
-describe('compiling scripts:', function () {
-  it('does not re-evaluate scripts', function () {
-    $('#THE_STAGE').html('<script type="text/applet"><div>OK</div></script>');
-    Applet.run('compile scripts');
-    Applet.run('compile scripts');
-    Applet.run('compile scripts');
-    expect($('#THE_STAGE').html()).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script>');
-  }); // === it does not re-evaluate scripts
-}); // === describe compiling scripts =================
