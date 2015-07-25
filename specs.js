@@ -48,3 +48,13 @@ describe('node_array:', function () {
   }); // === it returns raw text nodes
 
 }); // === describe node_array =================
+
+describe('compiling scripts:', function () {
+  it('does not re-evaluate scripts', function () {
+    $('#THE_STAGE').html('<script type="text/applet"><div>OK</div></script>');
+    Applet.run('compile scripts');
+    Applet.run('compile scripts');
+    Applet.run('compile scripts');
+    expect($('#THE_STAGE').html()).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script>');
+  }); // === it does not re-evaluate scripts
+}); // === describe compiling scripts =================
