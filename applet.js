@@ -2,7 +2,6 @@
 
 var Applet = {
   stack : [],
-  links : [],
   _id : -1
 };
 
@@ -15,7 +14,7 @@ var Applet = {
     return !!o[key];
   };
 
-  var log = function (str) {
+  var log = Applet.log = function (str) {
     if (window.console)
       return console.log.apply(console, arguments);
     return this;
@@ -99,24 +98,35 @@ var Applet = {
     standard_name = _.words(_.trim(msg.name).toLowerCase()).join(' ');
 
     if (msg.name === 'new func') {
-      Applet.links.push({name: 'func', from: Applet, to: msg.data });
+      Applet.stack.push({name: 'func', data: msg.data });
     }
 
+    msg.funcs = _.compact(_.map(Applet.stack, function (e) {
+      return (e.name === 'func') && e.data;
+    }));
 
     // === Run message:
+    var f, i, original_name;
     _.detect(['before before ', 'before ', '', 'after ', 'after after '], function (prefix) {
       msg.name = prefix + standard_name;
-      return _.detect(Applet.links, function (link) {
-        if (link.name !== 'func')
-          return false;
+      original_name = msg.name;
 
-        var original_name = msg.name;
-        link.to(msg);
+      var done = false;
+      i = 0;
+      while (msg.funcs[i]) {
+        f = msg.funcs[i];
+        i++;
+        f(msg);
 
         // === Stop running functions
         //     if names are different.
-        return msg.name !== original_name;
-      });
+        if (msg.name !== original_name) {
+          i = msg.funcs.length;
+          done = true;
+        }
+      }
+
+      return done;
     });
 
   }; // === func: run
@@ -124,103 +134,48 @@ var Applet = {
 
   // ================= THE CORE =========================
 
-  // === insert node
-  run(
-    function (e) {
-      if (e.name !== 'render scripts')
-        return;
-
-      _.each(e.data, function (raw_script) {
-        var script = $(raw_script);
-        id(script);
-        (script.contents()).insertBefore();
-        script.addClass('compiled');
-      });
-    }
-  ); // === insert node
-
-
-
   // === compile
   run(
     function (e) {
 
-      if (e.name !== 'compile scripts')
+      if (e.name !== 'before before compile scripts')
         return;
 
       var scripts = $('script[type="text/applet"]:not(script.compiled)');
-      if (scripts.length < 1)
+      if (scripts.length < 1) {
+        e.name = 'done';
         return;
+      }
 
-      Applet.run({
-        name       : 'render scripts',
-        dat        : scripts
+      e.data = scripts;
+      _.each(scripts, function (raw_script) {
+        var contents = $($(raw_script).text());
+        var script   = $(raw_script);
+        script.empty();
+        script.addClass('compiled');
+        script.append(contents);
       });
 
-      script.addClass('compiled');
-
-      Applet.run(e);
     } // === function
-  ); // == run compile
+  ); // == run
 
-  // === show_if
+  // === re-run "compile scripts" in case they are new SCRIPT tags
   run(
     function (e) {
+      if (e.name !== 'after after compile scripts')
+        return;
 
-      switch (e.name) {
+      _.each(e.data, function (raw) {
+        ($(raw).contents()).insertBefore($(raw));
+      });
 
-        case 'attr':
-          return 'show_if';
-
-        case 'node':
-          e.$.hide();
-
-          // === Register the node:
-          Applet.stacks.attrs.show_if.push({
-            id: Applet.id(e.$),
-            show_if: e.attrs.show_if
-          });
-
-          return;
-
-        default: // === show time
-          if (true)
-            return;
-          _.each(Applet.stacks.attrs.show_if, function (o) {
-            if (!_.has(e, o.show_if))
-              return;
-
-            if (e[o.show_if])
-              $('#' + o.id).show();
-            else
-              $('#' + o.id).hide();
-          });
-          return;
-
-      } // === switch e.name
-
+      Applet.run('compile scripts');
     }
-  ); // === run show_if
-
-  // === render
-  run(
-    function (e) {
-      switch (e.name) {
-        case 'attr':
-          return 'render';
-
-        case 'before raw node':
-          e.is_raw = false;
-          Applet.log(e);
-        break;
-      } // === switch e.name
-    }
-  ); // === render
+  ); // === run
 
   var THE_CORE = _.clone(Applet.stack);
   var reset = Applet.reset = function () {
     while (Applet.stack.length > 0) { Applet.stack.shift(); }
-
     _.each(THE_CORE, function (o) { Applet.stack.push(o); });
     return Applet;
   }; // === reset
