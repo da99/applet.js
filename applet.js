@@ -34,6 +34,14 @@ var Applet = {
     return new_id;
   }; // === id
 
+  var append = Applet.append = function (script) {
+    $($(script).contents()).insertAfter($(script));
+  }; // === append
+
+  var prepend = Applet.prepend = function (script) {
+    $($(script).contents()).insertBefore($(script));
+  }; // === append
+
   var attrs = Applet.attrs = function (dom) {
     return _.reduce(
       dom.attributes,
@@ -64,27 +72,26 @@ var Applet = {
 
   var run = Applet.run = function (func) {
 
-    var scripts, i, raw_script, contents, script;
+    var scripts, i, contents, script;
 
     while ((scripts = $('script[type="text/applet"]:not(script.compiled)')).length > 0) {
 
       i = 0;
 
       while (scripts[i]) {
-        contents = $($(scripts[i]).text());
         script   = $(scripts[i]);
+        contents = $(script.html());
         script.empty();
         script.append(contents);
         script.addClass('compiled');
         ++i;
       }
 
-      if (func)
-        func(scripts);
 
       i = 0;
       while (scripts[i]) {
-        ($(scripts[i]).contents()).insertBefore($(scripts[i]));
+        if (func)
+          func(scripts[i], scripts);
         ++i;
       }
     }

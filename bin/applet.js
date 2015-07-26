@@ -42,7 +42,7 @@ case "$action" in
 
 
     echo "=== Watching:"
-    inotifywait --quiet --monitor --event close_write  ./  | while read CHANGE
+    inotifywait --quiet --monitor --event close_write  "./" "$0" | while read CHANGE
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
@@ -50,6 +50,11 @@ case "$action" in
       path="${dir}$file"
 
       echo -e "=== $CHANGE ($path)"
+
+      if [[ "$path" =~ "$0" ]]; then
+        echo "=== Stopping this script."
+        kill -SIGINT -$$
+      fi
 
       if [[ "$file" =~ ".js" ]]; then
         echo -n "=== Running jshint: "
