@@ -17,6 +17,9 @@
     "tests",
     "specs.js"
   ],
+  "devDependencies" : {
+    "jasmine": "~2.3.4"
+  },
   "dependencies": {
     "jquery": "~2.1.4",
     "lodash": "~3.10.0"
