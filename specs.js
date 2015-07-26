@@ -73,9 +73,9 @@ describe('Applet:', function () {
 
     it('does not re-evaluate scripts', function () {
       $('#THE_STAGE').html('<script type="text/applet"><div>OK</div></script>');
-      Applet.run(Applet.prepend);
-      Applet.run(Applet.prepend);
-      Applet.run(Applet.prepend);
+      Applet.run(Applet.insert_before);
+      Applet.run(Applet.insert_before);
+      Applet.run(Applet.insert_before);
       expect($('#THE_STAGE').html()).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script>');
     }); // === it does not re-evaluate scripts
 
@@ -90,7 +90,7 @@ describe('Applet:', function () {
         '</script>'
       );
 
-      Applet.run(Applet.prepend);
+      Applet.run(Applet.insert_before);
       expect(
         $('#THE_STAGE').html()
       ).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script>');

@@ -34,13 +34,13 @@ var Applet = {
     return new_id;
   }; // === id
 
-  var append = Applet.append = function (script) {
+  var insert_after = Applet.insert_after = function (script) {
     $($(script).contents()).insertAfter($(script));
-  }; // === append
+  }; // === insert_after
 
-  var prepend = Applet.prepend = function (script) {
+  var insert_before = Applet.insert_before = function (script) {
     $($(script).contents()).insertBefore($(script));
-  }; // === append
+  }; // === insert_before
 
   var attrs = Applet.attrs = function (dom) {
     return _.reduce(
