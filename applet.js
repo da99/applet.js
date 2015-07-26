@@ -62,123 +62,36 @@ var Applet = {
     return arr;
   };
 
-  var run = Applet.run = function () {
+  var run = Applet.run = function (func) {
 
-    var msg, func, standard_name;
-    var args = _.toArray(arguments);
+    var scripts, i, raw_script, contents, script;
 
-    // === .run( 'name' )
-    if (_.isString(args[0]) && args.length === 1) {
-      msg = {name: args[0], data: {}};
-    } else
+    while ((scripts = $('script[type="text/applet"]:not(script.compiled)')).length > 0) {
 
-    // === .run( 'name', {} )
-    if ( _.isString(args[0]) && _.isPlainObject(args[1]) && args.length === 2 ) {
-      msg = {name: args[0], data: args[1]};
-    } else
-
-    // === .run( {...} )
-    if (_.isPlainObject(args[0]) && args.length === 1) {
-      msg = {name: 'data', data: args[0]};
-    } else
-
-    // === .run( func )
-    if (_.isFunction(args[0]) && args.length === 1) {
-      msg = {name: 'new func', data: args[0]};
-    } else {
-      log(args);
-      throw new Error("Unknown args");
-    }
-
-    // === Standardize data:
-    if (_.isPlainObject(msg.data))
-      msg.data = _.clone(msg.data);
-
-    // === Standardize name of message:
-    standard_name = _.words(_.trim(msg.name).toLowerCase()).join(' ');
-
-    if (msg.name === 'new func') {
-      Applet.stack.push({name: 'func', data: msg.data });
-    }
-
-    msg.funcs = _.compact(_.map(Applet.stack, function (e) {
-      return (e.name === 'func') && e.data;
-    }));
-
-    // === Run message:
-    var f, i, original_name;
-    _.detect(['before before ', 'before ', '', 'after ', 'after after '], function (prefix) {
-      msg.name = prefix + standard_name;
-      original_name = msg.name;
-
-      var done = false;
       i = 0;
-      while (msg.funcs[i]) {
-        f = msg.funcs[i];
-        i++;
-        f(msg);
 
-        // === Stop running functions
-        //     if names are different.
-        if (msg.name !== original_name) {
-          i = msg.funcs.length;
-          done = true;
-        }
+      while (scripts[i]) {
+        contents = $($(scripts[i]).text());
+        script   = $(scripts[i]);
+        script.empty();
+        script.append(contents);
+        script.addClass('compiled');
+        ++i;
       }
 
-      return done;
-    });
+      if (func)
+        func(scripts);
 
+      i = 0;
+      while (scripts[i]) {
+        ($(scripts[i]).contents()).insertBefore($(scripts[i]));
+        ++i;
+      }
+    }
+
+    return true;
   }; // === func: run
 
-
-  // ================= THE CORE =========================
-
-  // === compile
-  run(
-    function (e) {
-
-      if (e.name !== 'before before compile scripts')
-        return;
-
-      var scripts = $('script[type="text/applet"]:not(script.compiled)');
-      if (scripts.length < 1) {
-        e.name = 'done';
-        return;
-      }
-
-      e.data = scripts;
-      _.each(scripts, function (raw_script) {
-        var contents = $($(raw_script).text());
-        var script   = $(raw_script);
-        script.empty();
-        script.addClass('compiled');
-        script.append(contents);
-      });
-
-    } // === function
-  ); // == run
-
-  // === re-run "compile scripts" in case they are new SCRIPT tags
-  run(
-    function (e) {
-      if (e.name !== 'after after compile scripts')
-        return;
-
-      _.each(e.data, function (raw) {
-        ($(raw).contents()).insertBefore($(raw));
-      });
-
-      Applet.run('compile scripts');
-    }
-  ); // === run
-
-  var THE_CORE = _.clone(Applet.stack);
-  var reset = Applet.reset = function () {
-    while (Applet.stack.length > 0) { Applet.stack.shift(); }
-    _.each(THE_CORE, function (o) { Applet.stack.push(o); });
-    return Applet;
-  }; // === reset
 
 })(); // === end scope =================================
 

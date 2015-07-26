@@ -9,7 +9,6 @@ describe('Applet:', function () {
 
   beforeEach(function () {
     $('#THE_STAGE').empty();
-    Applet.reset();
   });
 
   describe('id:', function () {
@@ -74,9 +73,9 @@ describe('Applet:', function () {
 
     it('does not re-evaluate scripts', function () {
       $('#THE_STAGE').html('<script type="text/applet"><div>OK</div></script>');
-      Applet.run('compile scripts');
-      Applet.run('compile scripts');
-      Applet.run('compile scripts');
+      Applet.run();
+      Applet.run();
+      Applet.run();
       expect($('#THE_STAGE').html()).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script>');
     }); // === it does not re-evaluate scripts
 
@@ -91,7 +90,7 @@ describe('Applet:', function () {
         '</script>'
       );
 
-      Applet.run('compile scripts');
+      Applet.run();
       expect(
         $('#THE_STAGE').html()
       ).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script>');

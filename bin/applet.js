@@ -53,7 +53,7 @@ case "$action" in
 
       if [[ "$file" =~ ".js" ]]; then
         echo -n "=== Running jshint: "
-        ( bin/bin jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
+        ( $0 jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
 
         echo ""
       fi
