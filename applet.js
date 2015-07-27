@@ -42,6 +42,50 @@ var Applet = {
     $($(script).contents()).insertBefore($(script));
   }; // === insert_before
 
+  var meta_key = Applet.meta_key = function (str) {
+    var dots  = str.split('.');
+    var bangs = '';
+
+    if (dots[0]) {
+      var temp = /(\!+)?(.+)/.exec(dots[0]);
+      if (temp) {
+        bangs = temp[1] || '';
+        dots[0] = temp[2];
+      }
+    }
+
+    return { bangs: bangs, keys: dots};
+  }; // === func
+
+  var is_true = Applet.is_true = function (data, key) {
+    var meta = meta_key(key);
+    var current = data;
+    var ans  = false;
+
+    if (!_.has(data, meta.keys[0])) {
+      return undefined;
+    }
+
+    _.detect(meta.keys, function (key) {
+      if (_.has(current, key)) {
+        current = data[key];
+        ans = !!current;
+      } else {
+        ans = false;
+      }
+
+      return !ans;
+    });
+
+    if (meta.bangs) {
+      _.times(meta.bangs.length, function (n) {
+        ans = !ans;
+      });
+    }
+
+    return ans;
+  }; // === func
+
   var attrs = Applet.attrs = function (dom) {
     return _.reduce(
       dom.attributes,

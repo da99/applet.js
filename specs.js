@@ -40,6 +40,40 @@ describe('Applet:', function () {
 
   }); // === describe attrs =================
 
+  describe('is_true:', function () {
+
+    it('returns true if key is "truthy"', function () {
+      expect(
+        Applet.is_true({time: 'morning'}, 'time')
+      ).toEqual(true);
+    }); // === it returns true if key is "truthy"
+
+    it('returns true if: !key , key is !truthy', function () {
+      expect(
+        Applet.is_true({time: false}, '!time')
+      ).toEqual(true);
+    }); // === it returns true if: !key , key is !truthy
+
+    it('handles nested keys', function () {
+      expect(
+        Applet.is_true({first: {second: { third: true}}}, '!first.second.third')
+      ).toEqual(true);
+    }); // === it handles nested keys
+
+    it('handles multiple exclamation marks', function () {
+      expect(
+        Applet.is_true({first: false}, '!!!first')
+      ).toEqual(true);
+    }); // === it handles multiple exclamation marks
+
+    it('returns undefined if one non-nested key is specified, but not found', function () {
+      expect(
+        Applet.is_true({}, 'first')
+      ).toEqual(undefined);
+    }); // === it returns undefined if one non-nested key is specified, but not found
+
+  }); // === describe is_true =================
+
   describe('node_array:', function () {
 
     it('returns an Array when passed a String', function () {
