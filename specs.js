@@ -2,9 +2,6 @@
 /* jshint undef: true, unused: true */
 /* global Applet, describe, it, expect, beforeEach */
 
-$(function () {
-});
-
 describe('Applet:', function () {
 
   beforeEach(function () {
