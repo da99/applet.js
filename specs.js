@@ -128,5 +128,27 @@ describe('Applet:', function () {
     }); // === it keeps evaulating nested scripts until done
   }); // === describe compiling scripts =================
 
+  describe('remove_attr:', function () {
+
+    it('returns value of the attribute', function () {
+      $('#THE_STAGE').html('<div show_if="one"></div>');
+      expect(
+        Applet.remove_attr($('#THE_STAGE div:first'), 'show_if')
+      ).toEqual('one');
+    }); // === it returns value of the attribute
+
+    it('removes attribute from node', function () {
+      $('#THE_STAGE').html('<div id="target" show_if="one"></div>');
+      Applet.remove_attr($('#THE_STAGE div:first'), 'show_if');
+      expect(
+        _.reduce(
+          $('#THE_STAGE div:first')[0].attributes,
+          function (a, v) { a[v.name] = v.value; return a; },
+          {}
+        )
+      ).toEqual({id: 'target'});
+    }); // === it removes attribute from node
+
+  }); // === describe remove_attr =================
 
 }); // === describe Applet =================

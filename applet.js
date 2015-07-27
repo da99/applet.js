@@ -97,6 +97,12 @@ var Applet = {
     );
   }; // === attrs
 
+  Applet.remove_attr = function (node, name) {
+    var val = $(node).attr(name);
+    $(node).removeAttr(name);
+    return val;
+  };
+
   var node_array = Applet.node_array = function (unknown) {
     var arr = [];
     _.each($(unknown), function (dom) {
