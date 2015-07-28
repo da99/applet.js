@@ -124,11 +124,15 @@ var Applet = {
     return arr;
   };
 
-  var run = Applet.run = function (func) {
+  var raw_scripts = Applet.raw_scripts = function () {
+    return $('script[type="text/applet"]:not(script.compiled)');
+  }; // === func
+
+  var each_raw_script = Applet.each_raw_script = function (func) {
 
     var scripts, i, contents, script;
 
-    while ((scripts = $('script[type="text/applet"]:not(script.compiled)')).length > 0) {
+    while ((scripts = raw_scripts()).length > 0) {
 
       i = 0;
 
@@ -151,7 +155,7 @@ var Applet = {
     }
 
     return true;
-  }; // === func: run
+  }; // === func: each_raw_script
 
 
 })(); // === end scope =================================
