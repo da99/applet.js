@@ -97,6 +97,10 @@ var Applet = {
     );
   }; // === attrs
 
+  Applet.standard_name = function (str) {
+    return _.trim(str).replace(/\ +/g, ' ').toLowerCase();
+  };
+
   Applet.remove_attr = function (node, name) {
     var val = $(node).attr(name);
     $(node).removeAttr(name);

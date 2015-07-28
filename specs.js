@@ -151,4 +151,26 @@ describe('Applet:', function () {
 
   }); // === describe remove_attr =================
 
+  describe('standard_name:', function () {
+
+    it('lowercases names', function () {
+      expect(
+        Applet.standard_name('NAME NAME')
+      ).toEqual('name name');
+    }); // === it lowercases names
+
+    it('trims string', function () {
+      expect(
+        Applet.standard_name('  name  ')
+      ).toEqual('name');
+    }); // === it trims string
+
+    it('compacts multiple spaces', function () {
+      expect(
+        Applet.standard_name('name    name')
+      ).toEqual('name name');
+    }); // === it compacts multiple spaces
+
+  }); // === describe standard_name =================
+
 }); // === describe Applet =================
