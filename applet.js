@@ -157,6 +157,18 @@ var Applet = {
     return true;
   }; // === func: each_raw_script
 
+  Applet.top_descendents = function (dom, selector) {
+    var arr = [];
+    _.each($(dom), function (node) {
+      var o = $(node);
+      if (o.is(selector))
+        return arr.push(o);
+      arr = arr.concat(Applet.top_descendents(o.children(), selector));
+    }); // === func
+
+    return arr;
+  }; // === func
+
 
 })(); // === end scope =================================
 

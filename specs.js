@@ -173,4 +173,36 @@ describe('Applet:', function () {
 
   }); // === describe standard_name =================
 
+  describe('top_descendents:', function () {
+
+    it('returns self if selector matches', function () {
+      $('#THE_STAGE').html('<div id="target" template="num"></div>');
+      expect(
+        Applet.top_descendents($('#THE_STAGE').children(), '*[template]')[0].attr('id')
+      ).toEqual('target');
+    }); // === it returns self if selector matches
+
+    it('returns first children matching selector', function () {
+      $('#THE_STAGE').html('<div><span class="top"></span><span class="top"></span></div>');
+      expect(
+        _.map(
+          Applet.top_descendents($('#THE_STAGE').children(), '.top'),
+          function (n) { return n[0].tagName; }
+        )
+      ).toEqual(['SPAN', 'SPAN']);
+    }); // === it returns first children
+
+    it('does not return nested matching descendants if ancestor matches selector', function () {
+      $('#THE_STAGE').html(
+        '<div><div id="target" class="top"><span class="top"></span><span class="top"></span></div><div>'
+      );
+      expect(
+        _.map(
+          Applet.top_descendents($('#THE_STAGE').children(), '.top'),
+          function (n) { return [n[0].tagName, n.attr('id')]; }
+        )
+      ).toEqual([['DIV', 'target']]);
+    }); // === it does not return nested matching descendants if ancestor matches selector
+
+  }); // === describe closest =================
 }); // === describe Applet =================
