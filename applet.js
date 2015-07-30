@@ -37,6 +37,11 @@ var Applet = function (optional_func) {
     return this;
   };
 
+  // Examples:
+  //
+  //   .new_id()           ->  Integer
+  //   .new_id('prefix_')  ->  String
+  //
   Applet.new_id = function (prefix) {
     if (!Applet.hasOwnProperty('_id'))
       Applet._id = -1;
@@ -44,9 +49,12 @@ var Applet = function (optional_func) {
     return (prefix) ? prefix + Applet._id : Applet._id;
   }; // === func
 
-  // Get id or (create id, return it)
+  // Returns id.
+  // Sets id of element if no id is set.
+  //
   // .dom_id(raw_or_jquery)
   // .dom_id('prefix', raw_or_jquer)
+  //
   Applet.dom_id = function () {
     var args = _.toArray(arguments);
     var o      = _.find(args, _.negate(_.isString));
@@ -69,31 +77,22 @@ var Applet = function (optional_func) {
     $($(script).contents()).insertBefore($(script));
   }; // === insert_before
 
-  var meta_key = Applet.meta_key = function (str) {
-    var dots  = str.split('.');
-    var bangs = '';
+  Applet.FRONT_BANGS = /^\!+/;
 
-    if (dots[0]) {
-      var temp = /(\!+)?(.+)/.exec(dots[0]);
-      if (temp) {
-        bangs = temp[1] || '';
-        dots[0] = temp[2];
-      }
-    }
+  Applet.is_true = function (data, raw_key) {
+    var key        = _.trim(raw_key);
+    var bang_match = key.match(Applet.FRONT_BANGS);
+    var dots       = ( bang_match ? key.replace(bang_match[0], '') : key ).split('.');
+    var keys       = _.map( dots, _.trim );
 
-    return { bangs: bangs, keys: dots};
-  }; // === func
-
-  Applet.is_true = function (data, key) {
-    var meta = meta_key(key);
     var current = data;
     var ans  = false;
 
-    if (!_.has(data, meta.keys[0])) {
+    if (!_.has(data, keys[0])) {
       return undefined;
     }
 
-    _.detect(meta.keys, function (key) {
+    _.detect(keys, function (key) {
       if (_.has(current, key)) {
         current = data[key];
         ans = !!current;
@@ -104,8 +103,8 @@ var Applet = function (optional_func) {
       return !ans;
     });
 
-    if (meta.bangs) {
-      _.times(meta.bangs.length, function () {
+    if (bang_match) {
+      _.times(bang_match[0].length, function () {
         ans = !ans;
       });
     }
@@ -134,7 +133,7 @@ var Applet = function (optional_func) {
     return val;
   };
 
-  var node_array = Applet.node_array = function (unknown) {
+  Applet.node_array = function (unknown) {
     var arr = [];
     _.each($(unknown), function (dom) {
       if (dom.nodeType !== 1)
@@ -144,7 +143,7 @@ var Applet = function (optional_func) {
         tag    : dom.nodeName,
         attrs  : attrs(dom),
         custom : {},
-        childs : node_array($(dom).contents())
+        childs : Applet.node_array($(dom).contents())
       });
     });
 
@@ -303,6 +302,10 @@ var Applet = function (optional_func) {
   };
 
 
+  // =====================================================
+  // === CORE functions
+  // =====================================================
+
   // === dom ==================================
   Applet.func(function (o) {
     if (o.name === 'before dom') {
@@ -449,6 +452,7 @@ var Applet = function (optional_func) {
     ); // === _.each
   }); // === core: show_if ========
 
+  // === form =====================
   Applet.new_func(
     function (o) {
       if (o.name !== 'before form')
@@ -474,7 +478,7 @@ var Applet = function (optional_func) {
         }
       ); // === each
     }
-  ); // === push
+  ); // === new_func
 
 
 
