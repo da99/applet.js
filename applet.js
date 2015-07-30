@@ -212,9 +212,9 @@ var Applet = function (optional_func) {
     var id = _.findKey(i.func_ids, function (v) { return v === f; } );
 
     if (!id) {
-      id             = Applet.new_id('config_id_');
-      i.configs[id]  = {};
-      i.func_ids[id] = f;
+      id                      = Applet.new_id('config_id_');
+      i.func_id_to_config[id] = {};
+      i.func_ids[id]          = f;
     }
 
     return i.func_id_to_config[id];
@@ -291,9 +291,9 @@ var Applet = function (optional_func) {
     }
 
     if (func(msg) === 'top')
-      i.stack.unshift(func);
+      stack.unshift(func);
     else
-      i.stack.push(func);
+      stack.push(func);
 
     return this;
   };
@@ -304,7 +304,7 @@ var Applet = function (optional_func) {
   // =====================================================
 
   // === dom ==================================
-  Applet.func(function (o) {
+  Applet.new_func(function (o) {
     if (o.name === 'before dom') {
       if (!o.dom) {
         o.dom = Applet.raw_scripts();
@@ -336,7 +336,7 @@ var Applet = function (optional_func) {
 
 
   // === template ====================
-  Applet.func(function (o) {
+  Applet.new_func(function (o) {
     var this_config = o.this_config;
     var applet      = o.applet;
 
@@ -356,8 +356,9 @@ var Applet = function (optional_func) {
       _.map(
         Applet.top_descendents(o.dom, selector),
         function (t) {
-          var placeholder = $('<script type="text/applet_placeholder"></script>');
-          var placeholder_id = Applet.id(placeholder);
+          var placeholder    = $('<script type="text/applet_placeholder"></script>');
+          var placeholder_id = Applet.dom_id(placeholder);
+
           var attr = _.trim(Applet.remove_attr(t, 'template')).split(/\ +/);
           var name = attr.shift();
           var pos  = (attr.length > 0) ? attr.pop() : 'replace';
@@ -371,7 +372,7 @@ var Applet = function (optional_func) {
             pos       : pos
           };
 
-          applet.push(function (o) {
+          applet.new_func(function (o) {
             if (o.name !== 'data' || !_.isPlainObject(o.data[meta.name]))
               return;
 
@@ -402,7 +403,7 @@ var Applet = function (optional_func) {
 
 
   // === show_if ====================
-  Applet.func(function (o) {
+  Applet.new_func(function (o) {
     var this_config = o.this_config;
 
     if (o.name === 'constructor') {
@@ -423,13 +424,13 @@ var Applet = function (optional_func) {
       $(o.dom).find(selector).addBack(selector),
       function (raw) {
         var node = $(raw);
-        var id   = Applet.id(node);
+        var id   = Applet.dom_id(node);
         var val  = Applet.remove_attr(node, 'show_if');
 
         if (!Applet.is_true(this_config.show_if_data_cache, val))
           node.hide();
 
-        o.applet.push(
+        o.applet.new_func(
           function (o) {
             if (o.name !== 'data')
               return;

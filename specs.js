@@ -10,12 +10,12 @@ describe('Applet:', function () {
     $('#THE_STAGE').empty();
   });
 
-  describe('id:', function () {
+  describe('dom_id:', function () {
 
     it('adds ID attr to element', function () {
       var stage = $('#THE_STAGE');
       stage.html('<div>id</div>');
-      var id = Applet.id($('#THE_STAGE div:first'));
+      var id = Applet.dom_id($('#THE_STAGE div:first'));
       expect(
         $('#' + id).html()
       ).toEqual('id');
@@ -24,11 +24,11 @@ describe('Applet:', function () {
     it('does not override original ID', function () {
       var stage = $('#THE_STAGE');
       stage.html('<div id="non_override_1">override id</div>');
-      var id = Applet.id($('#THE_STAGE div:first'));
+      var id = Applet.dom_id($('#THE_STAGE div:first'));
       expect(id).toEqual('non_override_1');
     }); // === it does not override original ID
 
-  }); // === describe id =================
+  }); // === describe dom_id =================
 
   describe('attrs:', function () {
 
@@ -366,7 +366,7 @@ describe('Applet:', function () {
       app = new Applet();
 
       var result = null;
-      app.push(function (o) {
+      app.new_func(function (o) {
         if (o.name !== 'form submit')
           return;
         result = o.data.hello;
