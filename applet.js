@@ -88,20 +88,20 @@ var Applet = function (optional_func) {
     var current = data;
     var ans  = false;
 
-    if (!_.has(data, keys[0])) {
-      return undefined;
-    }
 
     _.detect(keys, function (key) {
       if (_.has(current, key)) {
         current = data[key];
         ans = !!current;
       } else {
-        ans = false;
+        ans = undefined;
       }
 
       return !ans;
     });
+
+    if (ans === undefined)
+      return ans;
 
     if (bang_match) {
       _.times(bang_match[0].length, function () {
@@ -195,14 +195,11 @@ var Applet = function (optional_func) {
     return arr;
   }; // === func
 
-  Applet.raw_scripts = function () {
-    return $('script[type="text/applet"]:not(script.compiled)');
-  }; // === func
-
 
   // =====================================================
   // === PROTOTYPE
   // =====================================================
+
 
   Applet.prototype.config_for_func = function (f) {
     var i = this;
