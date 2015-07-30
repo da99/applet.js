@@ -1,62 +1,62 @@
 "use strict";
+/* jshint undef: true, unused: true */
+/* global Hogan  */
 
-var Applet = null;
-
-(function () { // === scope ==============================
-
-  Applet = function () {
+var Applet = function (optional_func) {
     var i = this; // === this instance
 
-    i.stack = [];
-    i.id_counter = -1;
-    i.stack      = _.clone(Applet.core);
-
-    i.configs    = {}; // === used by callbacks to store info.
-    i.func_ids   = {}; // give each callback an id to be used in .configs
+    i.stack = _.clone(Applet.core);
 
     i.run('constructor');
+
+    if (optional_func)
+      optional_func(i);
+
     i.run('dom');
     i.run('form');
   }; // === Applet constructor ===========================
 
-  Applet._id = -1;
+
+(function () { // === scope ==============================
 
   // =====================================================
   // === HELPERS
   // =====================================================
 
-  var bool = function (o, key) {
+  var bool, log, id,
+  insert_after, insert_before, is_true, each_raw_script, raw_scripts;
+
+  bool = function (o, key) {
     if (!_.has(o, key))
       throw new Error('Key not found: ' + key);
 
     return !!o[key];
   };
 
-  var log = Applet.log = function (str) {
+  log = Applet.log = function () {
     if (window.console)
       return console.log.apply(console, arguments);
     return this;
   };
 
   // Get id or (create id, return it)
-  var id = Applet.id = function (raw, prefix) {
+  id = Applet.id = function (raw, prefix) {
     var o = $(raw);
     var old = o.attr('id');
 
     if (old && !_.isEmpty(old))
       return old;
 
-    Applet._id = Applet._id + 1;
-    var new_id = (prefix || 'id_for_applet') + '_' + Applet._id.toString();
+    var new_id = Applet.new_id(prefix || 'id_for_applet_') ;
     o.attr('id', new_id);
     return new_id;
   }; // === id
 
-  var insert_after = Applet.insert_after = function (script) {
+  insert_after = Applet.insert_after = function (script) {
     $($(script).contents()).insertAfter($(script));
   }; // === insert_after
 
-  var insert_before = Applet.insert_before = function (script) {
+  insert_before = Applet.insert_before = function (script) {
     $($(script).contents()).insertBefore($(script));
   }; // === insert_before
 
@@ -75,7 +75,7 @@ var Applet = null;
     return { bangs: bangs, keys: dots};
   }; // === func
 
-  var is_true = Applet.is_true = function (data, key) {
+  is_true = Applet.is_true = function (data, key) {
     var meta = meta_key(key);
     var current = data;
     var ans  = false;
@@ -96,7 +96,7 @@ var Applet = null;
     });
 
     if (meta.bangs) {
-      _.times(meta.bangs.length, function (n) {
+      _.times(meta.bangs.length, function () {
         ans = !ans;
       });
     }
@@ -142,11 +142,11 @@ var Applet = null;
     return arr;
   };
 
-  var raw_scripts = Applet.raw_scripts = function () {
+  raw_scripts = Applet.raw_scripts = function () {
     return $('script[type="text/applet"]:not(script.compiled)');
   }; // === func
 
-  var each_raw_script = Applet.each_raw_script = function (func) {
+  each_raw_script = Applet.each_raw_script = function (func) {
 
     var scripts, i, contents, script;
 
@@ -187,22 +187,32 @@ var Applet = null;
     return arr;
   }; // === func
 
+  Applet.raw_scripts = function () {
+    return $('script[type="text/applet"]:not(script.compiled)');
+  }; // === func
+
+
   // =====================================================
   // === PROTOTYPE
   // =====================================================
 
-  Applet.prototype.config_id = function (f) {
+  Applet.prototype.config_for_func = function (f) {
     var i = this;
+
+    if (!i.func_ids) {
+      i.func_id_to_config = {}; // === used by callbacks to store info.
+      i.func_ids          = {}; // give each callback an id to be used in .configs
+    }
+
     var id = _.findKey(i.func_ids, function (v) { return v === f; } );
 
     if (!id) {
-      i.id_counter   = i.id_counter + 1;
-      id             = 'config_id_' + i.id_counter;
+      id             = Applet.new_id('config_id_');
       i.configs[id]  = {};
       i.func_ids[id] = f;
     }
 
-    return id;
+    return i.func_id_to_config[id];
   }; // === config_id
 
   // === Examples:
@@ -241,7 +251,7 @@ var Applet = null;
 
         while (instance.stack[i]) {
           f             = instance.stack[i];
-          o.this_config = instance.configs[instance.config_id(f)];
+          o.this_config = instance.config_for_func(f);
           o.this_func   = f;
 
           f(o);
@@ -253,27 +263,40 @@ var Applet = null;
     return instance;
   }; // === func
 
-  Applet.prototype.unshift = function (func) {
-    this.stack.unshift(func);
+  Applet.prototype.new_func = Applet.new_func = function (func) {
+    var i   = this;
+    var msg = {name : 'this position'};
+    var stack;
+
+
+    if (i === Applet) {
+      msg.Applet = i;
+      if (!Applet.core)
+        Applet.core = [];
+      stack = Applet.core;
+    } else {
+      msg.applet = i;
+      stack = i.stack;
+    }
+
+    if (func(msg) === 'top')
+      i.stack.unshift(func);
+    else
+      i.stack.push(func);
+
     return this;
   };
 
-  Applet.prototype.push = function (func) {
-    this.stack.push(func);
-    return this;
-  };
-
-
-  // =================== CORE =================
-  Applet.core = [];
-
-
-  var raw_scripts = function () {
-    return $('script[type="text/applet"]:not(script.compiled)');
+  Applet.new_id = function (prefix) {
+    if (!Applet.hasOwnProperty('_id'))
+      Applet._id = -1;
+    Applet._id = Applet._id + 1;
+    return (prefix || '') + Applet._id;
   }; // === func
 
+
   // === dom ==================================
-  Applet.core.push(function (o) {
+  Applet.func(function (o) {
     if (o.name === 'before dom') {
       if (!o.dom) {
         o.dom = raw_scripts();
@@ -305,9 +328,12 @@ var Applet = null;
 
 
   // === template ====================
-  Applet.core.push(function (o) {
+  Applet.func(function (o) {
     var this_config = o.this_config;
-    var applet     = o.applet;
+    var applet      = o.applet;
+
+    if (o.name === 'this position')
+      return 'top';
 
     if (o.name === 'constructor') {
       o.this_config.templates = [];
@@ -368,7 +394,7 @@ var Applet = null;
 
 
   // === show_if ====================
-  Applet.core.push(function (o) {
+  Applet.func(function (o) {
     var this_config = o.this_config;
 
     if (o.name === 'constructor') {
@@ -415,7 +441,7 @@ var Applet = null;
     ); // === _.each
   }); // === core: show_if ========
 
-  Applet.core.push(
+  Applet.new_func(
     function (o) {
       if (o.name !== 'before form')
         return;
