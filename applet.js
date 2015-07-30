@@ -5,7 +5,7 @@
 var Applet = function (optional_func) {
   var i = this; // === this instance
 
-  i.stack = _.clone(Applet.core);
+  i.funcs = _.clone(Applet.core);
   i.run('constructor');
 
   if (optional_func)
@@ -254,8 +254,8 @@ var Applet = function (optional_func) {
         o.name = Applet.standard_name(name);
         var i = 0, f;
 
-        while (instance.stack[i]) {
-          f             = instance.stack[i];
+        while (instance.funcs[i]) {
+          f             = instance.funcs[i];
           o.this_config = instance.config_for_func(f);
           o.this_func   = f;
 
@@ -277,23 +277,23 @@ var Applet = function (optional_func) {
     }
 
     var msg = {name : 'this position'};
-    var stack;
+    var funcs;
 
 
     if (i === Applet) {
       msg.Applet = i;
       if (!Applet.core)
         Applet.core = [];
-      stack = Applet.core;
+      funcs = Applet.core;
     } else {
       msg.applet = i;
-      stack = i.stack;
+      funcs = i.funcs;
     }
 
     if (func(msg) === 'top')
-      stack.unshift(func);
+      funcs.unshift(func);
     else
-      stack.push(func);
+      funcs.push(func);
 
     return this;
   };
