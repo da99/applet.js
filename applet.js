@@ -3,18 +3,17 @@
 /* global Hogan  */
 
 var Applet = function (optional_func) {
-    var i = this; // === this instance
+  var i = this; // === this instance
 
-    i.stack = _.clone(Applet.core);
+  i.stack = _.clone(Applet.core);
+  i.run('constructor');
 
-    i.run('constructor');
+  if (optional_func)
+    i.new_func(optional_func);
 
-    if (optional_func)
-      optional_func(i);
-
-    i.run('dom');
-    i.run('form');
-  }; // === Applet constructor ===========================
+  i.run('dom');
+  i.run('form');
+}; // === Applet constructor ===========================
 
 
 (function () { // === scope ==============================
@@ -23,8 +22,7 @@ var Applet = function (optional_func) {
   // === HELPERS
   // =====================================================
 
-  var bool, log, id,
-  insert_after, insert_before, is_true, each_raw_script, raw_scripts;
+  var bool, log;
 
   bool = function (o, key) {
     if (!_.has(o, key))
@@ -39,10 +37,21 @@ var Applet = function (optional_func) {
     return this;
   };
 
+  Applet.new_id = function (prefix) {
+    if (!Applet.hasOwnProperty('_id'))
+      Applet._id = -1;
+    Applet._id = Applet._id + 1;
+    return (prefix) ? prefix + Applet._id : Applet._id;
+  }; // === func
+
   // Get id or (create id, return it)
-  id = Applet.id = function (raw, prefix) {
-    var o = $(raw);
-    var old = o.attr('id');
+  // .dom_id(raw_or_jquery)
+  // .dom_id('prefix', raw_or_jquer)
+  Applet.dom_id = function () {
+    var args = _.toArray(arguments);
+    var o      = _.find(args, _.negate(_.isString));
+    var prefix = _.find(args, _.isString);
+    var old    = o.attr('id');
 
     if (old && !_.isEmpty(old))
       return old;
@@ -52,11 +61,11 @@ var Applet = function (optional_func) {
     return new_id;
   }; // === id
 
-  insert_after = Applet.insert_after = function (script) {
+  Applet.insert_after = function (script) {
     $($(script).contents()).insertAfter($(script));
   }; // === insert_after
 
-  insert_before = Applet.insert_before = function (script) {
+  Applet.insert_before = function (script) {
     $($(script).contents()).insertBefore($(script));
   }; // === insert_before
 
@@ -75,7 +84,7 @@ var Applet = function (optional_func) {
     return { bangs: bangs, keys: dots};
   }; // === func
 
-  is_true = Applet.is_true = function (data, key) {
+  Applet.is_true = function (data, key) {
     var meta = meta_key(key);
     var current = data;
     var ans  = false;
@@ -142,15 +151,15 @@ var Applet = function (optional_func) {
     return arr;
   };
 
-  raw_scripts = Applet.raw_scripts = function () {
+  Applet.raw_scripts = function () {
     return $('script[type="text/applet"]:not(script.compiled)');
   }; // === func
 
-  each_raw_script = Applet.each_raw_script = function (func) {
+  Applet.each_raw_script = function (func) {
 
     var scripts, i, contents, script;
 
-    while ((scripts = raw_scripts()).length > 0) {
+    while ((scripts = Applet.raw_scripts()).length > 0) {
 
       i = 0;
 
@@ -265,6 +274,12 @@ var Applet = function (optional_func) {
 
   Applet.prototype.new_func = Applet.new_func = function (func) {
     var i   = this;
+
+    if (_.isArray(func)) {
+      _.each(func, function (f) { i.new_func(f); });
+      return i;
+    }
+
     var msg = {name : 'this position'};
     var stack;
 
@@ -287,19 +302,12 @@ var Applet = function (optional_func) {
     return this;
   };
 
-  Applet.new_id = function (prefix) {
-    if (!Applet.hasOwnProperty('_id'))
-      Applet._id = -1;
-    Applet._id = Applet._id + 1;
-    return (prefix || '') + Applet._id;
-  }; // === func
-
 
   // === dom ==================================
   Applet.func(function (o) {
     if (o.name === 'before dom') {
       if (!o.dom) {
-        o.dom = raw_scripts();
+        o.dom = Applet.raw_scripts();
         _.each(o.dom, function (raw) {
           var script   = $(raw);
           var contents = $(script.html());
@@ -321,7 +329,7 @@ var Applet = function (optional_func) {
     }
 
     if (o.name === 'after after dom') {
-      if (raw_scripts().length > 0)
+      if (Applet.raw_scripts().length > 0)
         o.applet.run('dom');
     }
   }); // === core: dom
