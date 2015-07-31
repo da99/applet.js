@@ -5,16 +5,17 @@
 var Applet = function (optional_func) {
   var i = this; // === this instance
 
-  i.funcs = _.clone(Applet.core);
-  i.run('constructor');
+  i.funcs = [];
 
   if (optional_func)
     i.new_func(optional_func);
 
+  i.run('constructor');
   i.run('dom');
   i.run('form');
 }; // === Applet constructor ===========================
 
+Applet.funcs = {};
 
 (function () { // === scope ==============================
 
@@ -268,7 +269,7 @@ var Applet = function (optional_func) {
     return instance;
   }; // === func
 
-  Applet.prototype.new_func = Applet.new_func = function (func) {
+  Applet.prototype.new_func = function (func) {
     var i   = this;
 
     if (_.isArray(func)) {
@@ -276,24 +277,12 @@ var Applet = function (optional_func) {
       return i;
     }
 
-    var msg = {name : 'this position'};
-    var funcs;
-
-
-    if (i === Applet) {
-      msg.Applet = i;
-      if (!Applet.core)
-        Applet.core = [];
-      funcs = Applet.core;
-    } else {
-      msg.applet = i;
-      funcs = i.funcs;
-    }
+    var msg = {name : 'this position', applet: i};
 
     if (func(msg) === 'top')
-      funcs.unshift(func);
+      i.funcs.unshift(func);
     else
-      funcs.push(func);
+      i.funcs.push(func);
 
     return this;
   };
@@ -304,7 +293,7 @@ var Applet = function (optional_func) {
   // =====================================================
 
   // === dom ==================================
-  Applet.new_func(function (o) {
+  Applet.funcs.dom = function (o) {
     if (o.name === 'before dom') {
       if (!o.dom) {
         o.dom = Applet.raw_scripts();
@@ -332,11 +321,11 @@ var Applet = function (optional_func) {
       if (Applet.raw_scripts().length > 0)
         o.applet.run('dom');
     }
-  }); // === core: dom
+  }; // === funcs: dom
 
 
   // === template ====================
-  Applet.new_func(function (o) {
+  Applet.funcs.template = function (o) {
     var this_config = o.this_config;
     var applet      = o.applet;
 
@@ -399,11 +388,11 @@ var Applet = function (optional_func) {
         }
     ) // === each
     );
-  }); // ==== core: template ==========
+  }; // ==== funcs: template ==========
 
 
   // === show_if ====================
-  Applet.new_func(function (o) {
+  Applet.funcs.show_if = function (o) {
     var this_config = o.this_config;
 
     if (o.name === 'constructor') {
@@ -448,35 +437,44 @@ var Applet = function (optional_func) {
         ); // === push
       } // === function raw
     ); // === _.each
-  }); // === core: show_if ========
+  }; // === funcs: show_if ========
+
+  // === ajax =====================
+  Applet.funcs.ajax = function (o) {
+
+    switch (o.name) {
+
+      case 'ajax':
+        if (o['send?']) { o.send_ajax(o.data); }
+      break;
+
+    } // === switch o.name
+
+  }; // === funcs: ajax
+
 
   // === form =====================
-  Applet.new_func(
-    function (o) {
-      if (o.name !== 'before form')
-        return;
-      if (o.name === 'form') {
-        if (!o['submit?'])
-          return;
-        o.send_ajax(o.data);
-      }
-      _.each(
-        $('form:not(form.compiled) button.submit'),
-        function (raw) {
-          $(raw).on('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            o.applet.run({
-              name: 'form submit',
-              'submit?' : true,
-              form: $(this).parent('form').attr('id'),
-              data: $(this).parent('form').serializeJSON()
-            });
+  Applet.funcs.form = function (o) {
+
+    if (o.name !== 'dom')
+      return;
+
+    _.each(
+      (o.form_submits = $('form:not(form.compiled) button.submit')),
+      function (raw) {
+        $(raw).on('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          o.applet.run({
+            name: 'ajax',
+            'send?' : true,
+            form_id: $(this).parent('form').attr('id'),
+            data: $(this).parent('form').serializeJSON()
           });
-        }
-      ); // === each
-    }
-  ); // === new_func
+        });
+      }
+    ); // === each
+  }; // === funcs: form
 
 
 

@@ -213,7 +213,7 @@ describe('Applet:', function () {
     it('inserts contents before SCRIPT tag', function () {
       $('#THE_STAGE')
       .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.show_if]);
       expect(
         $($('#THE_STAGE').children().first()).attr('id')
       ).toEqual('target');
@@ -226,7 +226,7 @@ describe('Applet:', function () {
     it('sets node to display=none by default', function () {
       $('#THE_STAGE')
       .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.show_if]);
       expect(
         $('#target').css('display')
       ).toEqual('none');
@@ -236,7 +236,7 @@ describe('Applet:', function () {
       $('#THE_STAGE')
       .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
 
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.show_if]);
       app.run('data', {'logged_in?': true});
 
       expect(
@@ -253,7 +253,7 @@ describe('Applet:', function () {
         '<script type="text/applet"><div template="num">{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
 
       expect(
         _.map($('#THE_STAGE').children(), function (n) {
@@ -267,7 +267,7 @@ describe('Applet:', function () {
         '<script type="text/applet"><div template="num">{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
       app
       .run('compile scripts')
       .run('data', {num: {word: 'one', num: 1}})
@@ -283,7 +283,7 @@ describe('Applet:', function () {
         '<script type="text/applet"><div template="num">{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
       app
       .run('compile scripts')
       .run('data', {num: {word: 'one', num: Date.now().toString()}})
@@ -301,7 +301,7 @@ describe('Applet:', function () {
         '<script type="text/applet"><div template="num top">{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
       app
       .run('compile scripts')
       .run('data', {num: {word: 'one', num: 1}})
@@ -318,7 +318,7 @@ describe('Applet:', function () {
         '<script type="text/applet"><div template="num bottom">{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
 
       app
       .run('compile scripts')
@@ -337,7 +337,7 @@ describe('Applet:', function () {
         '<script type="text/applet"><div template="num" id="target"><span show_if="show_num?">{{num.word}}</span></div></script>'
       );
 
-      app = new Applet();
+      app = new Applet(_.values(Applet.funcs));
       app
       .run('compile scripts')
       .run('data', {'show_num?': true, num: {word: 'number'}})
@@ -363,14 +363,14 @@ describe('Applet:', function () {
       $('#THE_STAGE').html(
         '<form id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
-      app = new Applet();
+      app = new Applet([Applet.funcs.dom, Applet.funcs.form]);
 
       var result = null;
       app.new_func(function (o) {
-        if (o.name !== 'form submit')
-          return;
-        result = o.data.hello;
-        o['submit?'] = false;
+        if (o.name === 'ajax') {
+          result = o.data.hello;
+          o['send?'] = false;
+        }
       });
 
       $('#THE_STAGE button.submit').click();
