@@ -8,6 +8,7 @@ server_pid=""
 shift
 set -u -e -o pipefail
 
+
 # ==============================================================
 # http://www.ibm.com/developerworks/aix/library/au-learningtput/
 green=$(tput setaf 2)
@@ -39,7 +40,7 @@ shutdown_server () {
 }
 
 cleanup () {
-  echo "=== Shutting down child processes..."
+  echo "=== Sending SIGINT to process group..."
   kill -SIGINT -$$
 }
 trap cleanup SIGINT SIGTERM
