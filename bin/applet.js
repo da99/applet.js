@@ -27,23 +27,33 @@ Orange='\e[0;33m'
 
 # ==============================================================
 start_server () {
-  echo "=== Starting server..."
   (iojs server.js) &
-  server_pid="$!"
+  export server_pid="$!"
+  echo "=== Started server: $server_pid"
 }
 
 shutdown_server () {
-  if [[ ! -z "$server_pid" ]]; then
-    echo "=== Shutting server down..."
-    kill -SIGINT "$server_pid" || echo ""
+  if [[ ! -z "$server_pid"  ]]; then
+    if kill -0 "$server_pid" 2>/dev/null; then
+      echo "=== Shutting server down: $server_pid ..."
+      kill -SIGINT "$server_pid"
+      export server_pid=""
+    fi
   fi
 }
 
+
 cleanup () {
-  echo "=== Sending SIGINT to process group..."
-  kill -SIGINT -$$
+  # echo "=== Sending SIGINT to process group..."
+  # kill -SIGINT -$$ || echo ""
+  shutdown_server
 }
 trap cleanup SIGINT SIGTERM
+
+jshint () {
+  echo -n "=== Running jshint: $1: "
+  ( $0 jshint "$1" && echo -e "${green}Passed${reset_color}" ) || js_failed=""
+}
 
 # ===============================================
 case "$action" in
@@ -61,6 +71,11 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
+    for file in ./*.js
+    do
+      jshint "$file"
+    done
+
     start_server
 
     echo "=== Watching..."
@@ -74,14 +89,13 @@ case "$action" in
       echo -e "=== $CHANGE ($path)"
 
       if [[ "$path" =~ "$0" ]]; then
-        echo "=== Stopping this script."
+        echo "=== Reloading..."
         shutdown_server
         exec "$0" "$orig_args"
       fi
 
       if [[ "$file" =~ ".js" ]]; then
-        echo -n "=== Running jshint: "
-        ( $0 jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
+        jshint $path
 
         echo ""
 
@@ -108,6 +122,5 @@ case "$action" in
     ;;
 
 esac # === case $action
-
 
 
