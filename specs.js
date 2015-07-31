@@ -382,8 +382,7 @@ describe('Applet:', function () {
         '<form action="http://localhost:4567/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
 
-      var r = null;
-      app = new Applet([
+      app = new Applet(
         Applet.funcs.dom,
         Applet.funcs.ajax,
         Applet.funcs.form,
@@ -395,7 +394,7 @@ describe('Applet:', function () {
             });
           }
         }
-      ]);
+      );
 
       $('#THE_STAGE button.submit').click();
     }, 1500); // === it by default, send form data using AJAX

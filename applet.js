@@ -1,14 +1,13 @@
 "use strict";
 /* jshint undef: true, unused: true */
-/* global Hogan  */
+/* global Hogan, promise  */
 
-var Applet = function (optional_func) {
+var Applet = function () {
   var i = this; // === this instance
 
   i.funcs = [];
 
-  if (optional_func)
-    i.new_func(optional_func);
+  i.new_func(_.flatten(_.toArray(arguments)));
 
   i.run('constructor');
   i.run('dom');
