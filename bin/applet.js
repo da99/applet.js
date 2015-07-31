@@ -29,13 +29,13 @@ Orange='\e[0;33m'
 start_server () {
   (iojs server.js) &
   server_pid="$!"
-  echo "=== Started server: $server_pid"
+  echo "=== Started server: $server_pid - $$"
 }
 
 shutdown_server () {
   if [[ ! -z "$server_pid"  ]]; then
     if kill -0 "$server_pid" 2>/dev/null; then
-      echo "=== Shutting server down: $server_pid ..."
+      echo "=== Shutting server down: $server_pid - $$ ..."
       kill -SIGINT "$server_pid"
       server_pid=""
     fi
@@ -43,12 +43,6 @@ shutdown_server () {
 }
 
 
-cleanup () {
-  # echo "=== Sending SIGINT to process group..."
-  # kill -SIGINT -$$ || echo ""
-  shutdown_server
-}
-trap cleanup SIGINT SIGTERM
 
 jshint () {
   echo -n "=== Running jshint: $1: "
@@ -71,10 +65,10 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
-    for file in ./*.js
-    do
-      jshint "$file"
-    done
+    # for file in ./*.js
+    # do
+      # jshint "$file"
+    # done
 
     start_server
 
@@ -122,5 +116,4 @@ case "$action" in
     ;;
 
 esac # === case $action
-
 
