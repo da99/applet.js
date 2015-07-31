@@ -445,7 +445,9 @@ Applet.funcs = {};
     switch (o.name) {
 
       case 'ajax':
-        if (o['send?']) { o.send_ajax(o.data); }
+        if (o['send?']) {
+          o.promise = promise.post(o.url, o.data, o.headers);
+        }
       break;
 
     } // === switch o.name
@@ -463,13 +465,16 @@ Applet.funcs = {};
       (o.form_submits = $('form:not(form.compiled) button.submit')),
       function (raw) {
         $(raw).on('click', function (e) {
+          var form = $(this).parent('form');
           e.preventDefault();
           e.stopPropagation();
           o.applet.run({
-            name: 'ajax',
+            name    : 'ajax',
             'send?' : true,
-            form_id: $(this).parent('form').attr('id'),
-            data: $(this).parent('form').serializeJSON()
+            form_id : form.attr('id'),
+            url     : form.attr('action'),
+            headers : {"Accept": "application/json"},
+            data    : form.serializeJSON()
           });
         });
       }

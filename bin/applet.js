@@ -35,7 +35,7 @@ start_server () {
 shutdown_server () {
   if [[ ! -z "$server_pid" ]]; then
     echo "=== Shutting server down..."
-    kill -SIGINT "$server_pid"
+    kill -SIGINT "$server_pid" || echo ""
   fi
 }
 

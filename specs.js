@@ -376,6 +376,30 @@ describe('Applet:', function () {
       $('#THE_STAGE button.submit').click();
       expect(result).toEqual('goodbye');
     }); // === it adds handlers to buttons
+
+    it('by default, send form data using AJAX', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      var r = null;
+      app = new Applet([
+        Applet.funcs.dom,
+        Applet.funcs.ajax,
+        Applet.funcs.form,
+        function (o) {
+          if (o.name === 'after ajax') {
+            o.promise.then(function (err, text, xhr) {
+              expect((err && 'Error: ' + xhr.status) || JSON.parse(text).when).toEqual('for now');
+              done();
+            });
+          }
+        }
+      ]);
+
+      $('#THE_STAGE button.submit').click();
+    }, 1500); // === it by default, send form data using AJAX
+
   }); // === describe forms =================
 
 
