@@ -2,7 +2,9 @@
 # -*- bash -*-
 #
 #
+orig_args="$@"
 action="$1"
+server_pid=""
 shift
 set -u -e -o pipefail
 
@@ -23,6 +25,24 @@ Green='\e[0;32m'
 Orange='\e[0;33m'
 
 # ==============================================================
+start_server () {
+  echo "=== Starting server..."
+  (iojs server.js) &
+  server_pid="$!"
+}
+
+shutdown_server () {
+  if [[ ! -z "$server_pid" ]]; then
+    echo "=== Shutting server down..."
+    kill -SIGINT "$server_pid"
+  fi
+}
+
+cleanup () {
+  echo "=== Shutting down child processes..."
+  kill -SIGINT -$$
+}
+trap cleanup SIGINT SIGTERM
 
 # ===============================================
 case "$action" in
@@ -40,8 +60,9 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
+    start_server
 
-    echo "=== Watching:"
+    echo "=== Watching..."
     inotifywait --quiet --monitor --event close_write  "./" "$0" | while read CHANGE
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
@@ -53,7 +74,8 @@ case "$action" in
 
       if [[ "$path" =~ "$0" ]]; then
         echo "=== Stopping this script."
-        kill -SIGINT -$$
+        shutdown_server
+        exec "$0" "$orig_args"
       fi
 
       if [[ "$file" =~ ".js" ]]; then
@@ -61,6 +83,11 @@ case "$action" in
         ( $0 jshint $path && echo -e "${green}Passed${reset_color}" ) || js_failed=""
 
         echo ""
+
+        if [[ "$file" =~ "server.js" ]]; then
+          shutdown_server
+          start_server
+        fi
       fi
     done
 

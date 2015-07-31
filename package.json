@@ -1,5 +1,5 @@
 {
-  "name": "da99's applet.js",
+  "name": "da99_applet_js",
   "version": "0.0.0",
   "description": "Logic-less templates to a new level",
   "main": "applet.js",
@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "bower": "^1.4.1",
-    "jshint": "^2.8.0"
+    "jshint": "^2.8.0",
+    "seneca": ">0.0.0"
   }
 }
