@@ -28,7 +28,7 @@ Orange='\e[0;33m'
 # ==============================================================
 start_server () {
   (iojs server.js) &
-  export server_pid="$!"
+  server_pid="$!"
   echo "=== Started server: $server_pid"
 }
 
@@ -37,7 +37,7 @@ shutdown_server () {
     if kill -0 "$server_pid" 2>/dev/null; then
       echo "=== Shutting server down: $server_pid ..."
       kill -SIGINT "$server_pid"
-      export server_pid=""
+      server_pid=""
     fi
   fi
 }
