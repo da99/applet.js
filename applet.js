@@ -13,10 +13,6 @@ var Applet = function () {
   i.run('dom');
 }; // === Applet constructor ===========================
 
-// === Container for core functions:
-// .show_if, .template, etc
-Applet.funcs = {};
-
 (function () { // === scope ==============================
 
   // =====================================================
@@ -243,106 +239,86 @@ Applet.funcs = {};
   // === FUNCTIONS
   // =====================================================
 
-  // === scripts ==============================
-  Applet.funcs.scripts = function (o) {
-    if (!(o.name === 'dom' && !o.target))
-      return;
-
-
-    if (!o.this_func.raw_scripts) {
-      o.this_func.raw_scripts = function () {
-        return $('script[type="text/applet"]:not(script.compiled)');
-      };
-    }
-
-    var raw_scripts, i, raw, script, contents, final_script;
-    while ((raw_scripts = o.this_func.raw_scripts()).length > 0) {
-        i = 0;
-        while (raw_scripts[i]) {
-          raw = raw_scripts[i];
-          script   = $(raw);
-          contents = $(script.html());
-
-          script.empty();
-          script.append(contents);
-          script.addClass('compiled');
-
-          o.applet.run({name: 'dom', target: script});
-
-          final_script = $(o.target.filter('script'));
-          final_script
-          .contents()
-          .insertBefore(final_script);
-        }
-    } // === while
-
-  }; // === funcs: scripts
-
+  Applet.funcs = {};
 
   // === template ====================
   Applet.funcs.template = function (o) {
-    var this_config = o.this_config;
-    var applet      = o.applet;
-
     if (o.name === 'this position')
       return 'top';
-
-    if (o.name === 'constructor') {
-      o.this_config.templates = [];
-      return;
-    }
 
     if (o.name !== 'dom')
       return;
 
-    var selector  = '*[template]';
-    this_config.templates = this_config.templates.concat(
-      _.map(
-        Applet.top_descendents(o.dom, selector),
-        function (t) {
-          var placeholder    = $('<script type="text/applet_placeholder"></script>');
-          var placeholder_id = Applet.dom_id(placeholder);
+    var selector    = 'script[type^="text/mustache"].not(script.compiled)';
+    var scripts     = Applet.top_descendents((o.target || $('body')), selector);
 
-          var attr = _.trim(Applet.remove_attr(t, 'template')).split(/\ +/);
-          var name = attr.shift();
-          var pos  = (attr.length > 0) ? attr.pop() : 'replace';
+    if (scripts.length > 0)
+      return;
 
-          var meta = {
-            name      : name,
-            html      : t.prop('outerHTML'),
-            mustache  : Hogan.compile(t.prop('outerHTML')),
-            placeholder_id : placeholder_id,
-            elements  : null,
-            pos       : pos
-          };
+    var i = 0, t, data_key, placeholder_id, id, pos, meta, types;
 
-          applet.new_func(function (o) {
-            if (o.name !== 'data' || !_.isPlainObject(o.data[meta.name]))
-              return;
+    if (!o.this_func.render) {
+      o.this_func.render = function (o) {
+        var meta = this;
+        if (o.name !== 'data' || !_.isPlainObject(o.data[meta.key]))
+          return;
 
-            // === Remove old nodes:
-            if (meta.elements && meta.pos === 'replace') {
-              meta.elements.remove();
-            }
-
-            var html = $(meta.mustache.render(o.data));
-            if (meta.pos === 'replace' || meta.pos === 'bottom')
-              html.insertBefore($('#' + meta.placeholder_id));
-            else
-              html.insertAfter($('#' + meta.placeholder_id));
-
-            meta.elements = html;
-            applet.run({
-              name: 'dom',
-              dom:  html
-            });
-          });
-
-          t.replaceWith(placeholder);
-          return meta;
+        // === Remove old nodes:
+        if (meta.elements && meta.pos === 'replace') {
+          meta.elements.remove();
         }
-    ) // === each
-    );
+
+        var html = $(meta.mustache.render(o.data));
+        if (meta.pos === 'replace' || meta.pos === 'bottom')
+          html.insertBefore($('#' + meta.placeholder_id));
+        else
+          html.insertAfter($('#' + meta.placeholder_id));
+
+        meta.elements = html;
+        o.applet.run({
+          name   : 'dom',
+          target : html
+        });
+      };
+    } // === if render
+
+    while (scripts[i]) {
+      t = scripts[i];
+      ++i;
+
+      placeholder_id = Applet.dom_id(t);
+      data_key       = types[2];
+      id             = Applet.dom_id(t, 'mustache_templates_' + (data_key || ''));
+
+      switch (_.trim(types[1])) {
+
+        case 'mustache-top':
+          pos = 'top';
+          break;
+
+        case 'mustache-bottom':
+          pos = 'bottom';
+          break;
+
+        default:
+          pos = 'replace';
+
+      } // === switch type[1]
+
+      meta = {
+        id             : id,
+        key            : data_key,
+        html           : t.prop('outerHTML'),
+        mustache       : Hogan.compile(t.prop('outerHTML')),
+        placeholder_id : placeholder_id,
+        elements       : null,
+        pos            : pos
+      };
+
+      o.applet.new_func(o.this_func.render.bind(meta));
+
+    } // === while
+
   }; // ==== funcs: template ==========
 
 
@@ -363,35 +339,41 @@ Applet.funcs = {};
     if (o.name !== 'dom')
       return;
 
-    var selector = '*[show_if]';
-    _.each(
-      $(o.dom).find(selector).addBack(selector),
-      function (raw) {
-        var node = $(raw);
-        var id   = Applet.dom_id(node);
-        var val  = Applet.remove_attr(node, 'show_if');
+    var selector = '*[data-show_if]';
+    var i=0, node, id, val;
+    var target = $(o.target || $('body')).find(selector).addBack(selector);
 
-        if (!Applet.is_true(this_config.show_if_data_cache, val))
-          node.hide();
+    if (!o.this_func.show) {
+      o.this_func.show = function (o) {
+        if (o.name !== 'data')
+          return;
 
-        o.applet.new_func(
-          function (o) {
-            if (o.name !== 'data')
-              return;
+        var val  = this;
+        var data = o.data;
+        var ans = Applet.is_true(data, val);
+        if (ans === undefined)
+          return;
 
-            var data = o.data;
-            var ans = Applet.is_true(data, val);
-            if (ans === undefined)
-              return;
+        if ( ans )
+          $('#' + id).show();
+        else
+          $('#' + id).hide();
+      }; // === func
+    } // === if show
 
-            if ( ans )
-              $('#' + id).show();
-            else
-              $('#' + id).hide();
-          }
-        ); // === push
-      } // === function raw
-    ); // === _.each
+    while (target[i]) {
+      node = $(target[i]);
+      id   = Applet.dom_id(node);
+      val  = Applet.remove_attr(node, 'data-show_if');
+      ++i;
+
+      if (!Applet.is_true(this_config.show_if_data_cache, val))
+        node.hide();
+
+      o.applet.new_func(o.this_func.show.bind(val));
+
+    } // === while
+
   }; // === funcs: show_if ========
 
   // === ajax =====================
@@ -416,24 +398,30 @@ Applet.funcs = {};
     if (o.name !== 'dom')
       return;
 
-    _.each(
-      (o.form_submits = $('form:not(form.compiled) button.submit')),
-      function (raw) {
-        $(raw).on('click', function (e) {
-          var form = $(this).parent('form');
-          e.preventDefault();
-          e.stopPropagation();
-          o.applet.run({
-            name    : 'ajax',
-            'send?' : true,
-            form_id : form.attr('id'),
-            url     : form.attr('action'),
-            headers : {"Accept": "application/json"},
-            data    : form.serializeJSON()
-          });
+    var selector = $('form:not(form.compiled) button.submit');
+    var target   = $(o.target || $('body')).find(selector).addBack(selector);
+
+    if (!o.this_func.submit) {
+      o.this_func.submit = function (e) {
+        var form = $(this).parent('form');
+        e.preventDefault();
+        e.stopPropagation();
+        o.applet.run({
+          name    : 'ajax',
+          'send?' : true,
+          form_id : form.attr('id'),
+          url     : form.attr('action'),
+          headers : {"Accept": "application/json"},
+          data    : form.serializeJSON()
         });
-      }
-    ); // === each
+      };
+    } // === if this_func
+
+    var i = 0;
+    while (target[i]) {
+      $(target[i]).on('click', o.this_func.submit);
+      ++i;
+    } // === while
   }; // === funcs: form
 
 
