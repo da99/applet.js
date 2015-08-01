@@ -11,7 +11,6 @@ var Applet = function () {
 
   i.run('constructor');
   i.run('dom');
-  i.run('form');
 }; // === Applet constructor ===========================
 
 Applet.funcs = {};
@@ -150,10 +149,6 @@ Applet.funcs = {};
     return arr;
   };
 
-  Applet.raw_scripts = function () {
-    return $('script[type="text/applet"]:not(script.compiled)');
-  }; // === func
-
   Applet.each_raw_script = function (func) {
 
     var scripts, i, contents, script;
@@ -242,28 +237,17 @@ Applet.funcs = {};
 
     o.applet = instance;
 
-    _.each(
-      [
-        'before before ' + o.name,
-        'before ' + o.name,
-        o.name,
-        'after ' + o.name,
-        'after after ' + o.name
-      ],
-      function (name) {
-        o.name = Applet.standard_name(name);
-        var i = 0, f;
+    o.name = Applet.standard_name(o.name);
+    var i = 0, f;
 
-        while (instance.funcs[i]) {
-          f             = instance.funcs[i];
-          o.this_config = instance.config_for_func(f);
-          o.this_func   = f;
+    while (instance.funcs[i]) {
+      f             = instance.funcs[i];
+      o.this_config = instance.config_for_func(f);
+      o.this_func   = f;
 
-          f(o);
-          ++i;
-        }
-      }
-    ); // === _.each name
+      f(o);
+      ++i;
+    }
 
     return instance;
   }; // === func
@@ -288,39 +272,43 @@ Applet.funcs = {};
 
 
   // =====================================================
-  // === CORE functions
+  // === FUNCTIONS
   // =====================================================
 
-  // === dom ==================================
-  Applet.funcs.dom = function (o) {
-    if (o.name === 'before dom') {
-      if (!o.dom) {
-        o.dom = Applet.raw_scripts();
-        _.each(o.dom, function (raw) {
-          var script   = $(raw);
-          var contents = $(script.html());
+  // === scripts ==============================
+  Applet.funcs.scripts = function (o) {
+    if (!(o.name === 'dom' && !o.target))
+      return;
+
+
+    if (!o.this_func.raw_scripts) {
+      o.this_func.raw_scripts = function () {
+        return $('script[type="text/applet"]:not(script.compiled)');
+      };
+    }
+
+    var raw_scripts, i, raw, script, contents, final_script;
+    while ((raw_scripts = o.this_func.raw_scripts()).length > 0) {
+        i = 0;
+        while (raw_scripts[i]) {
+          raw = raw_scripts[i];
+          script   = $(raw);
+          contents = $(script.html());
+
           script.empty();
           script.append(contents);
           script.addClass('compiled');
-        });
-      }
-    }
 
-    if (o.name === 'after dom') {
-      _.each(
-        o.dom.filter('script'),
-        function (e) {
-          var s = $(e);
-          (s.contents()).insertBefore(s);
+          o.applet.run({name: 'dom', target: script});
+
+          final_script = $(o.target.filter('script'));
+          final_script
+          .contents()
+          .insertBefore(final_script);
         }
-      );
-    }
+    } // === while
 
-    if (o.name === 'after after dom') {
-      if (Applet.raw_scripts().length > 0)
-        o.applet.run('dom');
-    }
-  }; // === funcs: dom
+  }; // === funcs: scripts
 
 
   // === template ====================

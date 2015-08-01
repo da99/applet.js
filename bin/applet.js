@@ -65,10 +65,10 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
-    # for file in ./*.js
-    # do
-      # jshint "$file"
-    # done
+    for file in ./*.js
+    do
+      jshint "$file"
+    done
 
     start_server
 

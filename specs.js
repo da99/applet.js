@@ -208,25 +208,25 @@ describe('Applet:', function () {
 
   }); // === describe closest =================
 
-  describe('run:', function () {
+  describe('scripts:', function () {
 
     it('inserts contents before SCRIPT tag', function () {
       $('#THE_STAGE')
       .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
-      app = new Applet([Applet.funcs.dom, Applet.funcs.show_if]);
+      app = new Applet([Applet.funcs.script, Applet.funcs.show_if]);
       expect(
         $($('#THE_STAGE').children().first()).attr('id')
       ).toEqual('target');
     }); // === it inserts contents before SCRIPT tag
 
-  }); // === describe run =================
+  }); // === describe scripts =================
 
   describe('show_if:', function () {
 
     it('sets node to display=none by default', function () {
       $('#THE_STAGE')
-      .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
-      app = new Applet([Applet.funcs.dom, Applet.funcs.show_if]);
+      .html('<div id="target" data-show_if="logged_in?">logged</div>');
+      app = new Applet(Applet.funcs.show_if);
       expect(
         $('#target').css('display')
       ).toEqual('none');
@@ -234,9 +234,9 @@ describe('Applet:', function () {
 
     it('makes node visible if data has a truthy kv', function () {
       $('#THE_STAGE')
-      .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
+      .html('<div id="target" data-show_if="logged_in?">logged</div>');
 
-      app = new Applet([Applet.funcs.dom, Applet.funcs.show_if]);
+      app = new Applet(Applet.funcs.show_if);
       app.run('data', {'logged_in?': true});
 
       expect(
@@ -250,7 +250,7 @@ describe('Applet:', function () {
 
     it('does not render by default', function () {
       $('#THE_STAGE').html(
-        '<script type="text/applet"><div template="num">{{num.word}} {{num.num}}</div></script>'
+        '<div data-template="num">{{num.word}} {{num.num}}</div>'
       );
 
       app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
