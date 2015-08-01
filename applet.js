@@ -224,6 +224,9 @@ var Applet = function () {
       return i;
     }
 
+    if (!_.isFunction(func))
+      return new Error('Error: Not a function');
+
     var msg = {name : 'this position', applet: i};
 
     if (func(msg) === 'top')
@@ -249,13 +252,10 @@ var Applet = function () {
     if (o.name !== 'dom')
       return;
 
-    var selector    = 'script[type^="text/mustache"].not(script.compiled)';
+    var selector    = 'script[type^="text/mustache"]:not(script.compiled)';
     var scripts     = Applet.top_descendents((o.target || $('body')), selector);
-
     if (scripts.length > 0)
       return;
-
-    var i = 0, t, data_key, placeholder_id, id, pos, meta, types;
 
     if (!o.this_func.render) {
       o.this_func.render = function (o) {
@@ -282,8 +282,11 @@ var Applet = function () {
       };
     } // === if render
 
+    var i = 0, t, html, data_key, placeholder_id, id, pos, types;
     while (scripts[i]) {
-      t = scripts[i];
+      t    = $(scripts[i]);
+      html = t.html();
+      t.addClass('compiled');
       ++i;
 
       placeholder_id = Applet.dom_id(t);
@@ -305,17 +308,16 @@ var Applet = function () {
 
       } // === switch type[1]
 
-      meta = {
+      o.applet.new_func(o.this_func.render.bind({
         id             : id,
         key            : data_key,
-        html           : t.prop('outerHTML'),
-        mustache       : Hogan.compile(t.prop('outerHTML')),
+        html           : html,
+        mustache       : Hogan.compile(html),
         placeholder_id : placeholder_id,
         elements       : null,
         pos            : pos
-      };
+      }));
 
-      o.applet.new_func(o.this_func.render.bind(meta));
 
     } // === while
 
@@ -423,8 +425,6 @@ var Applet = function () {
       ++i;
     } // === while
   }; // === funcs: form
-
-
 
 })(); // === end scope =================================
 

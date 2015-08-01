@@ -102,34 +102,6 @@ describe('Applet:', function () {
 
   }); // === describe node_array =================
 
-  describe('compiling scripts:', function () {
-
-    it('does not re-evaluate scripts', function () {
-      $('#THE_STAGE').html('<script type="text/applet"><div>OK</div></script>');
-      Applet.each_raw_script(Applet.insert_before);
-      Applet.each_raw_script(Applet.insert_before);
-      Applet.each_raw_script(Applet.insert_before);
-      expect($('#THE_STAGE').html()).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script>');
-    }); // === it does not re-evaluate scripts
-
-    it('keeps evaulating nested scripts until done', function () {
-      $('#THE_STAGE').html(
-        '<script type="text/applet">' +
-        '<script type="text/applet">' +
-        '<script type="text/applet">' +
-        '<div>OK</div>' +
-        '</script>' +
-        '</script>' +
-        '</script>'
-      );
-
-      Applet.each_raw_script(Applet.insert_before);
-      expect(
-        $('#THE_STAGE').html()
-      ).toEqual('<div>OK</div><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script><script type="text/applet" class="compiled"></script>');
-    }); // === it keeps evaulating nested scripts until done
-  }); // === describe compiling scripts =================
-
   describe('remove_attr:', function () {
 
     it('returns value of the attribute', function () {
@@ -208,19 +180,6 @@ describe('Applet:', function () {
 
   }); // === describe closest =================
 
-  describe('scripts:', function () {
-
-    it('inserts contents before SCRIPT tag', function () {
-      $('#THE_STAGE')
-      .html('<script type="text/applet"><div id="target" show_if="logged_in?">logged</div></script>');
-      app = new Applet([Applet.funcs.script, Applet.funcs.show_if]);
-      expect(
-        $($('#THE_STAGE').children().first()).attr('id')
-      ).toEqual('target');
-    }); // === it inserts contents before SCRIPT tag
-
-  }); // === describe scripts =================
-
   describe('show_if:', function () {
 
     it('sets node to display=none by default', function () {
@@ -250,26 +209,24 @@ describe('Applet:', function () {
 
     it('does not render by default', function () {
       $('#THE_STAGE').html(
-        '<div data-template="num">{{num.word}} {{num.num}}</div>'
+        '<script type="text/mustache/num">{{num.word}} {{num.num}}</script>'
       );
 
-      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
+      app = new Applet(Applet.funcs.template);
 
       expect(
         _.map($('#THE_STAGE').children(), function (n) {
           return $(n).attr('type');
         })
-      ).toEqual(['text/applet_placeholder', 'text/applet']);
+      ).toEqual(['text/mustache/num']);
     }); // === it does not render by default
 
     it('renders elements on top of where it is found', function () {
       $('#THE_STAGE').html(
-        '<script type="text/applet"><div template="num">{{num.word}} {{num.num}}</div></script>'
+        '<script type="text/mustache/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
-      app
-      .run('compile scripts')
+      (app = new Applet(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: 1}})
       ;
 
@@ -280,12 +237,10 @@ describe('Applet:', function () {
 
     it('replaces elements, including text nodes', function () {
       $('#THE_STAGE').html(
-        '<script type="text/applet"><div template="num">{{num.word}} {{num.num}}</div></script>'
+        '<script type="text/mustache/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
-      app
-      .run('compile scripts')
+      (app = new Applet(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: Date.now().toString()}})
       .run('data', {num: {word: 'two', num: 2}})
       ;
@@ -298,12 +253,10 @@ describe('Applet:', function () {
 
     it('appends rendered template above w/ option: top', function () {
       $('#THE_STAGE').html(
-        '<script type="text/applet"><div template="num top">{{num.word}} {{num.num}}</div></script>'
+        '<script type="text/mustache-top/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
-      app
-      .run('compile scripts')
+      (app = new Applet(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: 1}})
       .run('data', {num: {word: 'two', num: 2}})
       ;
@@ -315,13 +268,10 @@ describe('Applet:', function () {
 
     it('appends rendered template below w/ option: bottom', function () {
       $('#THE_STAGE').html(
-        '<script type="text/applet"><div template="num bottom">{{num.word}} {{num.num}}</div></script>'
+        '<script type="text/mustache-bottom/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      app = new Applet([Applet.funcs.dom, Applet.funcs.template]);
-
-      app
-      .run('compile scripts')
+      (app = new Applet([Applet.funcs.dom, Applet.funcs.template]))
       .run('data', {num: {word: 'one', num: 1}})
       .run('data', {num: {word: 'two', num: 2}})
       .run('data', {num: {word: 'three', num: 3}})
@@ -334,12 +284,10 @@ describe('Applet:', function () {
 
     it('renders template w/ attr functionality', function () {
       $('#THE_STAGE').html(
-        '<script type="text/applet"><div template="num" id="target"><span show_if="show_num?">{{num.word}}</span></div></script>'
+        '<script type="text/mustache/num"><div id="target"><span show_if="show_num?">{{num.word}}</span></div></script>'
       );
 
-      app = new Applet(_.values(Applet.funcs));
-      app
-      .run('compile scripts')
+      (app = new Applet(_.values(Applet.funcs)))
       .run('data', {'show_num?': true, num: {word: 'number'}})
       ;
 
