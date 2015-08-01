@@ -13,6 +13,8 @@ var Applet = function () {
   i.run('dom');
 }; // === Applet constructor ===========================
 
+// === Container for core functions:
+// .show_if, .template, etc
 Applet.funcs = {};
 
 (function () { // === scope ==============================
@@ -21,14 +23,7 @@ Applet.funcs = {};
   // === HELPERS
   // =====================================================
 
-  var bool, log;
-
-  bool = function (o, key) {
-    if (!_.has(o, key))
-      throw new Error('Key not found: ' + key);
-
-    return !!o[key];
-  };
+  var log;
 
   log = Applet.log = function () {
     if (window.console)
@@ -76,9 +71,11 @@ Applet.funcs = {};
     $($(script).contents()).insertBefore($(script));
   }; // === insert_before
 
-  Applet.FRONT_BANGS = /^\!+/;
 
   Applet.is_true = function (data, raw_key) {
+    if (!Applet.FRONT_BANGS)
+      Applet.FRONT_BANGS = /^\!+/;
+
     var key        = _.trim(raw_key);
     var bang_match = key.match(Applet.FRONT_BANGS);
     var dots       = ( bang_match ? key.replace(bang_match[0], '') : key ).split('.');
@@ -111,7 +108,7 @@ Applet.funcs = {};
     return ans;
   }; // === func
 
-  var attrs = Applet.attrs = function (dom) {
+  Applet.attrs = function (dom) {
     return _.reduce(
       dom.attributes,
       function (kv, o) {
@@ -140,7 +137,7 @@ Applet.funcs = {};
 
       arr.push({
         tag    : dom.nodeName,
-        attrs  : attrs(dom),
+        attrs  : Applet.attrs(dom),
         custom : {},
         childs : Applet.node_array($(dom).contents())
       });
@@ -148,35 +145,6 @@ Applet.funcs = {};
 
     return arr;
   };
-
-  Applet.each_raw_script = function (func) {
-
-    var scripts, i, contents, script;
-
-    while ((scripts = Applet.raw_scripts()).length > 0) {
-
-      i = 0;
-
-      while (scripts[i]) {
-        script   = $(scripts[i]);
-        contents = $(script.html());
-        script.empty();
-        script.append(contents);
-        script.addClass('compiled');
-        ++i;
-      }
-
-
-      i = 0;
-      while (scripts[i]) {
-        if (func)
-          func(scripts[i], scripts);
-        ++i;
-      }
-    }
-
-    return true;
-  }; // === func: each_raw_script
 
   Applet.top_descendents = function (dom, selector) {
     var arr = [];
