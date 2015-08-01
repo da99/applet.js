@@ -2,6 +2,11 @@
 /* jshint undef: true, unused: true */
 /* global Applet, describe, it, expect, beforeEach */
 
+
+function outer_html(raw) {
+  return raw.map(function () { return $(this).prop('outerHTML'); }).toArray().join('');
+}
+
 var app;
 
 describe('Applet:', function () {
@@ -231,13 +236,13 @@ describe('Applet:', function () {
       ;
 
       expect(
-        $('#THE_STAGE').children().first().prop('outerHTML')
+        outer_html($('#THE_STAGE').children().first())
       ).toEqual('<div>one 1</div>');
     }); // === it renders elements on top of where it is found
 
     it('replaces elements, including text nodes', function () {
       $('#THE_STAGE').html(
-        '<script type="text/mustache/num"><div>{{num.word}} {{num.num}}</div></script>'
+        '<script id="target" type="text/mustache/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
       (app = new Applet(Applet.funcs.template))
@@ -247,8 +252,8 @@ describe('Applet:', function () {
 
 
       expect(
-        $('#THE_STAGE').text()
-      ).toEqual('two 2');
+        outer_html( $('#THE_STAGE').find('div') )
+      ).toEqual('<div>two 2</div>');
     }); // === it replaces elements, including text nodes
 
     it('appends rendered template above w/ option: top', function () {
@@ -260,10 +265,9 @@ describe('Applet:', function () {
       .run('data', {num: {word: 'one', num: 1}})
       .run('data', {num: {word: 'two', num: 2}})
       ;
-
       expect(
-        $('#THE_STAGE').text()
-      ).toEqual('two 2one 1');
+        outer_html( $('#THE_STAGE').find('div') )
+      ).toEqual('<div>two 2</div><div>one 1</div>');
     }); // === it appends rendered template above w/ option: top
 
     it('appends rendered template below w/ option: bottom', function () {
@@ -271,20 +275,20 @@ describe('Applet:', function () {
         '<script type="text/mustache-bottom/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      (app = new Applet([Applet.funcs.dom, Applet.funcs.template]))
+      (app = new Applet(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: 1}})
       .run('data', {num: {word: 'two', num: 2}})
       .run('data', {num: {word: 'three', num: 3}})
       ;
 
       expect(
-        $('#THE_STAGE').text()
-      ).toEqual('one 1two 2three 3');
+        outer_html($('#THE_STAGE').find('div'))
+      ).toEqual('<div>one 1</div><div>two 2</div><div>three 3</div>');
     }); // === it appends rendered template above w/ option: bottom
 
     it('renders template w/ attr functionality', function () {
       $('#THE_STAGE').html(
-        '<script type="text/mustache/num"><div id="target"><span show_if="show_num?">{{num.word}}</span></div></script>'
+        '<script type="text/mustache/num"><div id="target"><span data-show_if="show_num?">{{num.word}}</span></div></script>'
       );
 
       (app = new Applet(_.values(Applet.funcs)))
@@ -309,17 +313,19 @@ describe('Applet:', function () {
 
     it('adds handlers to buttons', function () {
       $('#THE_STAGE').html(
-        '<form id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
-      app = new Applet([Applet.funcs.dom, Applet.funcs.form]);
-
+      app = new Applet(
+        function (o) {
+          if (o.name === 'ajax') {
+            result = o.data.hello;
+            o['send?'] = false;
+          }
+        },
+        Applet.funcs.form,
+        Applet.funcs.ajax
+      );
       var result = null;
-      app.new_func(function (o) {
-        if (o.name === 'ajax') {
-          result = o.data.hello;
-          o['send?'] = false;
-        }
-      });
 
       $('#THE_STAGE button.submit').click();
       expect(result).toEqual('goodbye');
@@ -331,21 +337,18 @@ describe('Applet:', function () {
       );
 
       app = new Applet(
-        Applet.funcs.dom,
-        Applet.funcs.ajax,
         Applet.funcs.form,
         function (o) {
-          if (o.name === 'after ajax') {
-            o.promise.then(function (err, text, xhr) {
-              expect((err && 'Error: ' + xhr.status) || JSON.parse(text).when).toEqual('for now');
-              done();
-            });
+          if (o.name === 'ajax response') {
+            expect((o.err && 'Error: ' + o.xhr.status) || JSON.parse(o.text).when).toEqual('for now');
+            done();
           }
-        }
+        },
+        Applet.funcs.ajax
       );
 
       $('#THE_STAGE button.submit').click();
-    }, 1500); // === it by default, send form data using AJAX
+    }, 1000); // === it by default, send form data using AJAX
 
   }); // === describe forms =================
 

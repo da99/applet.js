@@ -204,6 +204,8 @@ var Applet = function () {
     o.name = Applet.standard_name(o.name);
     var i = 0, f;
 
+    // if (o.name.indexOf('ajax') > -1)
+    // log(instance)
     while (instance.funcs[i]) {
       f             = instance.funcs[i];
       o.this_config = instance.config_for_func(f);
@@ -216,23 +218,21 @@ var Applet = function () {
     return instance;
   }; // === func
 
-  Applet.prototype.new_func = function (func) {
+  Applet.prototype.new_func = function () {
+
+    var arr = _.flatten(_.toArray(arguments));
     var i   = this;
 
-    if (_.isArray(func)) {
-      _.each(func, function (f) { i.new_func(f); });
-      return i;
-    }
+    _.each(arr, function (f) {
+      if (!_.isFunction(f))
+        throw new Error('Error: Not a function');
+      if (f({name : 'this position', applet: i}) === 'top')
+        i.funcs.unshift(f);
+      else
+        i.funcs.push(f);
+    });
 
-    if (!_.isFunction(func))
-      return new Error('Error: Not a function');
 
-    var msg = {name : 'this position', applet: i};
-
-    if (func(msg) === 'top')
-      i.funcs.unshift(func);
-    else
-      i.funcs.push(func);
 
     return this;
   };
@@ -253,8 +253,8 @@ var Applet = function () {
       return;
 
     var selector    = 'script[type^="text/mustache"]:not(script.compiled)';
-    var scripts     = Applet.top_descendents((o.target || $('body')), selector);
-    if (scripts.length > 0)
+    var scripts     = (o.target || $('body')).find(selector).addBack(selector);
+    if (scripts.length < 1)
       return;
 
     if (!o.this_func.render) {
@@ -285,6 +285,7 @@ var Applet = function () {
     var i = 0, t, html, data_key, placeholder_id, id, pos, types;
     while (scripts[i]) {
       t    = $(scripts[i]);
+      types = t.attr('type').split('/');
       html = t.html();
       t.addClass('compiled');
       ++i;
@@ -341,38 +342,40 @@ var Applet = function () {
     if (o.name !== 'dom')
       return;
 
-    var selector = '*[data-show_if]';
-    var i=0, node, id, val;
-    var target = $(o.target || $('body')).find(selector).addBack(selector);
-
     if (!o.this_func.show) {
       o.this_func.show = function (o) {
         if (o.name !== 'data')
           return;
 
-        var val  = this;
+        var meta = this;
         var data = o.data;
-        var ans = Applet.is_true(data, val);
+        var ans  = Applet.is_true(data, meta.key);
         if (ans === undefined)
           return;
 
         if ( ans )
-          $('#' + id).show();
+          $('#' + meta.id).show();
         else
-          $('#' + id).hide();
+          $('#' + meta.id).hide();
       }; // === func
     } // === if show
 
+    var selector = '*[data-show_if]';
+    var target = $(o.target || $('body')).find(selector).addBack(selector);
+
+    var i=0, node, val;
     while (target[i]) {
       node = $(target[i]);
-      id   = Applet.dom_id(node);
       val  = Applet.remove_attr(node, 'data-show_if');
       ++i;
 
       if (!Applet.is_true(this_config.show_if_data_cache, val))
         node.hide();
 
-      o.applet.new_func(o.this_func.show.bind(val));
+      o.applet.new_func(o.this_func.show.bind({
+        key: val,
+        id:  Applet.dom_id(node)
+      }));
 
     } // === while
 
@@ -386,6 +389,15 @@ var Applet = function () {
       case 'ajax':
         if (o['send?']) {
           o.promise = promise.post(o.url, o.data, o.headers);
+          o.promise.then(function (err, text, xhr) {
+            o.applet.run({
+              name: 'ajax response',
+              err: err,
+              text: text,
+              xhr: xhr,
+              promise: o.promise
+            });
+          });
         }
       break;
 
@@ -404,24 +416,26 @@ var Applet = function () {
     var target   = $(o.target || $('body')).find(selector).addBack(selector);
 
     if (!o.this_func.submit) {
-      o.this_func.submit = function (e) {
-        var form = $(this).parent('form');
-        e.preventDefault();
-        e.stopPropagation();
-        o.applet.run({
-          name    : 'ajax',
-          'send?' : true,
-          form_id : form.attr('id'),
-          url     : form.attr('action'),
-          headers : {"Accept": "application/json"},
-          data    : form.serializeJSON()
-        });
+      o.this_func.submit = function (a) {
+        return function (e) {
+          var form = $(this).parent('form');
+          e.preventDefault();
+          e.stopPropagation();
+          a.run({
+            name    : 'ajax',
+            'send?' : true,
+            form_id : form.attr('id'),
+            url     : form.attr('action'),
+            headers : {"Accept": "application/json"},
+            data    : form.serializeJSON()
+          });
+        };
       };
     } // === if this_func
 
     var i = 0;
     while (target[i]) {
-      $(target[i]).on('click', o.this_func.submit);
+      $(target[i]).on('click', o.this_func.submit(o.applet));
       ++i;
     } // === while
   }; // === funcs: form
