@@ -77,8 +77,8 @@ case "$action" in
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
-      file=$(echo "$CHANGE" | cut -d' ' -f 3)
-      path="${dir}$file"
+      path="${dir}$(echo "$CHANGE" | cut -d' ' -f 3)"
+      file="$(basename $path)"
 
       echo -e "=== $CHANGE ($path)"
 
