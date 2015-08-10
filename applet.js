@@ -80,7 +80,6 @@ var Applet = function () {
     var current = data;
     var ans  = false;
 
-
     _.detect(keys, function (key) {
       if (_.has(current, key)) {
         current = data[key];
@@ -380,6 +379,63 @@ var Applet = function () {
     } // === while
 
   }; // === funcs: show_if ========
+
+  // === hide_if ====================
+  Applet.funcs.hide_if = function (o) {
+    var this_config = o.this_config;
+
+    if (o.name === 'constructor') {
+      this_config.hide_if_data_cache = {};
+      return;
+    }
+
+    if (o.name === 'data') {
+      _.extend(this_config.hide_if_data_cache, o.data);
+      return;
+    }
+
+    if (o.name !== 'dom')
+      return;
+
+    if (!o.this_func.hide) {
+      o.this_func.hide = function (o) {
+        if (o.name !== 'data')
+          return;
+
+        var meta = this;
+        var data = o.data;
+        var ans  = Applet.is_true(data, meta.key);
+        if (ans === undefined)
+          return;
+
+        if ( ans )
+          $('#' + meta.id).hide();
+        else
+          $('#' + meta.id).show();
+      }; // === func
+    } // === if hide
+
+    var selector = '*[data-hide_if]';
+    var target = $(o.target || $('body')).find(selector).addBack(selector);
+
+    var i=0, node, val;
+    while (target[i]) {
+      node = $(target[i]);
+      val  = Applet.remove_attr(node, 'data-hide_if');
+      ++i;
+
+      if (Applet.is_true(this_config.hide_if_data_cache, val) === true)
+        node.hide();
+
+      o.applet.new_func(o.this_func.hide.bind({
+        key: val,
+        id:  Applet.dom_id(node)
+      }));
+
+    } // === while
+
+  }; // === funcs: hide_if ========
+
 
   // === ajax =====================
   Applet.funcs.ajax = function (o) {

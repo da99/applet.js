@@ -210,6 +210,32 @@ describe('Applet:', function () {
 
   }); // === describe show_if =================
 
+  describe('hide_if:', function () {
+
+    it('does not alter css display by default', function () {
+      $('#THE_STAGE')
+      .html('<div id="target" data-hide_if="loaded?">logging</div>');
+      app = new Applet(Applet.funcs.hide_if);
+      expect(
+        $('#target').css('display')
+      ).toEqual('block');
+    }); // === it
+
+    it('sets display="none" if data has a truthy kv', function () {
+      $('#THE_STAGE')
+      .html('<div id="target" data-hide_if="loaded?">Loading</div>');
+
+      app = new Applet(Applet.funcs.hide_if);
+      app.run('data', {'loaded?': true});
+
+      expect(
+        $('#target').css('display')
+      ).toEqual('none');
+    }); // === it
+
+  }); // === describe hide_if =================
+
+
   describe('template:', function () {
 
     it('does not render by default', function () {
