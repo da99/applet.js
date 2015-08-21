@@ -44,11 +44,6 @@ shutdown_server () {
 
 
 
-jshint () {
-  echo -n "=== Running jshint: $1: "
-  ( $0 jshint "$1" && echo -e "${green}Passed${reset_color}" ) || js_failed=""
-}
-
 # ===============================================
 case "$action" in
 
@@ -59,11 +54,8 @@ case "$action" in
     exit 0
     ;;
 
-  "jshint")
-    for file in ./*.js
-    do
-      js_setup jshint "$file"
-    done
+  "jshint!")
+    js_setup jshint! ./*.js
     ;;
 
   "watch")
@@ -72,7 +64,7 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
-    $0 jshint
+    $0 jshint!
 
     start_server
 
