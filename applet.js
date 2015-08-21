@@ -410,6 +410,12 @@ var Applet = function () {
               err: err,
               text: text,
               xhr: xhr,
+              request : {
+                form_id : o.form_id,
+                url     : o.url,
+                data    : o.data,
+                headers : o.headers
+              },
               promise: o.promise
             });
           });
@@ -424,6 +430,11 @@ var Applet = function () {
   // === form =====================
   Applet.funcs.form = function (o) {
 
+    if (o.name === 'ajax response' && o.request) {
+      $('#' + o.request.form_id ).prop('disabled', false);
+      return;
+    }
+
     if (o.name !== 'dom')
       return;
 
@@ -434,6 +445,7 @@ var Applet = function () {
       o.this_func.submit = function (a) {
         return function (e) {
           var form = $(this).parent('form');
+          form.prop('disabled', true);
           e.preventDefault();
           e.stopPropagation();
           a.run({

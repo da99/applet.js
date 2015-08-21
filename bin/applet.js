@@ -59,16 +59,20 @@ case "$action" in
     exit 0
     ;;
 
+  "jshint")
+    for file in ./*.js
+    do
+      js_setup jshint "$file"
+    done
+    ;;
+
   "watch")
 
     # === Regular expression:
     IFS=$'\n'
     re='^[0-9]+$'
 
-    for file in ./*.js
-    do
-      jshint "$file"
-    done
+    $0 jshint
 
     start_server
 

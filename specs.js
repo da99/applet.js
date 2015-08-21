@@ -357,6 +357,98 @@ describe('Applet:', function () {
       expect(result).toEqual('goodbye');
     }); // === it adds handlers to buttons
 
+    it('disables form before making AJAX call', function () {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+      );
+      app = new Applet( Applet.funcs.form );
+      $('#THE_STAGE button.submit').click();
+      expect( $('#target').prop('disabled') ).toEqual( true );
+    }); // === it disables form before making AJAX call
+
+    it('re-enables form after AJAX response', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect($('#' + o.request.form_id).prop('disabled')).toEqual(false);
+          done();
+        }
+      }
+
+      app = new Applet( Applet.funcs.form, func, Applet.funcs.ajax );
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it re-enables form after AJAX response
+
+    it('adds .request.url to AJAX response', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.request.url).toEqual($('#target').attr('action'));
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it adds .request.url to AJAX response
+
+    it('adds .request.data to AJAX response', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567" id="target">' +
+        '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.request.data).toEqual({my_data: 'stargate'});
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it adds .request.data to AJAX response
+
+    it('adds .request.headers to AJAX response', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567" id="target">' +
+        '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.request.headers).toEqual({Accept: 'application/json'});
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it adds .request.headers to AJAX response
+
+    it('adds .request.form_id to AJAX response', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567" id="target">' +
+        '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.request.form_id).toEqual('target');
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it adds .request.form_id to AJAX response
+
     it('by default, send form data using AJAX', function (done) {
       $('#THE_STAGE').html(
         '<form action="http://localhost:4567/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
