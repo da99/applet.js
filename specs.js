@@ -337,10 +337,14 @@ describe('Applet:', function () {
 
   describe('forms:', function () {
 
-    it('adds handlers to buttons', function () {
+    it('adds handlers to buttons (even when deeply nested in the form)', function () {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4567" id="target">' +
+        '<input type="hidden" name="hello" value="goodbye" />' + 
+          '<div><div><button class="submit">SUBMIT</button></div></div>' +
+          '</form>'
       );
+
       app = new Applet(
         function (o) {
           if (o.name === 'ajax') {

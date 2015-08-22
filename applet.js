@@ -444,7 +444,7 @@ var Applet = function () {
     if (!o.this_func.submit) {
       o.this_func.submit = function (a) {
         return function (e) {
-          var form = $(this).parent('form');
+          var form = $(this).closest('form');
           form.prop('disabled', true);
           e.preventDefault();
           e.stopPropagation();
