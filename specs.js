@@ -501,7 +501,7 @@ describe('Applet:', function () {
 
       function func(o) {
         if (o.name === 'ajax response') {
-          expect(o.response.error).toEqual({tags: ['unknown'], msg: 'Some invalid html.'});
+          expect(o.response.error).toEqual({tags: ['invalid json'], msg: 'Some invalid html.'});
           done();
         }
       }

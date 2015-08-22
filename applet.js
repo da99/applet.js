@@ -422,21 +422,29 @@ var Applet = function () {
 
       case 'ajax response':
         if (!o.response && o.raw_response) {
-          var status = o.raw_response.xhr && o.raw_response.xhr.status;
-          var err_status = status && status > 399 && status;
-          var tags = [];
-          if (err_status) {
-            tags.push('server');
-            tags.push(err_status);
+          var status     = o.raw_response.xhr && o.raw_response.xhr.status;
+          var err        = o.raw_response.err;
+          var err_tags   = [];
+          if (err) {
+            err_tags.push('server');
+            err_tags.push(status);
           }
+
           o.response = {};
+
+          var json;
           try {
-            o.response = JSON.parse(o.raw_response.text);
+            json = JSON.parse(o.raw_response.text);
           } catch(e) {
-            if (_.isEmpty(tags))
-              tags.push('unknown');
-            o.response = {error: {tags: tags, msg: o.raw_response.text}};
+            err = true;
+            if (_.isEmpty(err_tags))
+              err_tags.push('invalid json');
           }
+
+          if (err)
+            o.response = {error: {tags: err_tags, msg: o.raw_response.text}};
+          else
+            o.response = json;
         }
       break;
 
