@@ -85,7 +85,7 @@ case "$action" in
       fi
 
       if [[ "$file" =~ ".js" ]]; then
-        jshint $path
+        js_setup jshint $path
 
         echo ""
 

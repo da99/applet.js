@@ -12,13 +12,19 @@ var server = http.createServer(
   function (req, resp) {
     var h = {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*'};
     C.log(req.method + ' ' + req.url);
-    if (req.url === '/') {
-      resp.writeHead(200, h);
+
+    switch (req.url) {
+
+      case "/":
+        resp.writeHead(200, h);
       resp.end(JSON.stringify({when: 'for now'}));
-    } else {
-      resp.writeHead(404, h);
-      resp.end(JSON.stringify({msg: 'not found: ' + req.method + ' ' + req.url}));
-    }
+      break;
+
+      default:
+        resp.writeHead(404, h);
+        resp.end(JSON.stringify({msg: 'not found: ' + req.method + ' ' + req.url}));
+
+    } // === switch req.url
   }
 );
 

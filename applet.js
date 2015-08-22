@@ -407,9 +407,7 @@ var Applet = function () {
           o.promise.then(function (err, text, xhr) {
             o.applet.run({
               name: 'ajax response',
-              err: err,
-              text: text,
-              xhr: xhr,
+              raw_response: {err: err, text: text, xhr: xhr},
               request : {
                 form_id : o.form_id,
                 url     : o.url,
@@ -419,6 +417,17 @@ var Applet = function () {
               promise: o.promise
             });
           });
+        }
+      break;
+
+      case 'ajax response':
+        if (!o.response && o.raw_response) {
+          o.response = {};
+          try {
+            o.response = JSON.parse(o.raw_response.text);
+          } catch(e) {
+            o.response = {error: {tags: ['unknown'], msg: o.text}};
+          }
         }
       break;
 
