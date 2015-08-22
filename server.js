@@ -17,7 +17,30 @@ var server = http.createServer(
 
       case "/":
         resp.writeHead(200, h);
-      resp.end(JSON.stringify({when: 'for now'}));
+        resp.end(JSON.stringify({when: 'for now'}));
+      break;
+
+      case "/html":
+        h['Content-Type'] = 'text/html';
+        resp.writeHead(200, h);
+        resp.end("<html><body>Some html.</body></html>");
+      break;
+
+      case "/string-as-html":
+        h['Content-Type'] = 'text/html';
+        resp.writeHead(200, h);
+        resp.end("Some invalid html.");
+      break;
+
+      case "/text":
+        h['Content-Type'] = 'text/plain';
+        resp.writeHead(200, h);
+        resp.end("Some plain text.");
+      break;
+
+      case "/json":
+        resp.writeHead(200, h);
+        resp.end(JSON.stringify({msg: 'get smart'}));
       break;
 
       default:

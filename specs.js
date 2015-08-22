@@ -386,6 +386,29 @@ describe('Applet:', function () {
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it re-enables form after AJAX response
 
+    it('by default, send form data using AJAX', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      app = new Applet(
+        Applet.funcs.form,
+        Applet.funcs.ajax,
+        function (o) {
+          if (o.name === 'ajax response') {
+            expect(o.response.when).toEqual('for now');
+            done();
+          }
+        }
+      );
+
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it by default, send form data using AJAX
+
+  }); // === describe forms =================
+
+  describe('ajax:', function () {
+
     it('adds .request.url to AJAX response', function (done) {
       $('#THE_STAGE').html(
         '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
@@ -453,26 +476,23 @@ describe('Applet:', function () {
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.form_id to AJAX response
 
-    it('by default, send form data using AJAX', function (done) {
+    it('sets .response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4567/json" id="target">' +
+        '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
-      app = new Applet(
-        Applet.funcs.form,
-        function (o) {
-          if (o.name === 'ajax response') {
-            expect((o.err && 'Error: ' + o.xhr.status) || JSON.parse(o.text).when).toEqual('for now');
-            done();
-          }
-        },
-        Applet.funcs.ajax
-      );
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.response).toEqual({ msg : 'get smart' });
+          done();
+        }
+      }
 
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
-    }, 1000); // === it by default, send form data using AJAX
+    }); // === it sets .response
 
-  }); // === describe forms =================
-
+  }); // === describe ajax =================
 
 }); // === describe Applet =================
