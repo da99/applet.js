@@ -493,6 +493,40 @@ describe('Applet:', function () {
       $('#THE_STAGE button.submit').click();
     }); // === it sets .response
 
+    it('sets .response.error if content is invalid JSON', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567/string-as-html" id="target">' +
+        '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.response.error).toEqual({tags: ['unknown'], msg: 'Some invalid html.'});
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }); // === it sets .response.error if content is invalid JSON
+
+    it('sets .response.error to {type: [\'server\'] if server error', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4567/404-html" id="target">' +
+        '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.response.error).toEqual({tags: ['server', 404], msg: '<p>Not found: /404-html</p>'});
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }); // === it sets .response.error to {type: [\'server\'] if server error
+
   }); // === describe ajax =================
 
 }); // === describe Applet =================

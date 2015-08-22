@@ -422,11 +422,20 @@ var Applet = function () {
 
       case 'ajax response':
         if (!o.response && o.raw_response) {
+          var status = o.raw_response.xhr && o.raw_response.xhr.status;
+          var err_status = status && status > 399 && status;
+          var tags = [];
+          if (err_status) {
+            tags.push('server');
+            tags.push(err_status);
+          }
           o.response = {};
           try {
             o.response = JSON.parse(o.raw_response.text);
           } catch(e) {
-            o.response = {error: {tags: ['unknown'], msg: o.text}};
+            if (_.isEmpty(tags))
+              tags.push('unknown');
+            o.response = {error: {tags: tags, msg: o.raw_response.text}};
           }
         }
       break;

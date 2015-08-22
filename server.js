@@ -26,6 +26,12 @@ var server = http.createServer(
         resp.end("<html><body>Some html.</body></html>");
       break;
 
+      case "/404-html":
+        h['Content-Type'] = 'text/html';
+        resp.writeHead(404, h);
+        resp.end("<p>Not found: " + req.url + "</p>");
+      break;
+
       case "/string-as-html":
         h['Content-Type'] = 'text/html';
         resp.writeHead(200, h);
