@@ -58,7 +58,7 @@ var server = http.createServer(
 );
 
 //Lets start our server
-var PORT = 4567;
+var PORT = 4560;
 server.listen(PORT, function(){
     //Callback triggered when server is successfully listening. Hurray!
     C.log("Server listening on: http://localhost:%s", PORT);

@@ -339,7 +339,7 @@ describe('Applet:', function () {
 
     it('adds handlers to buttons (even when deeply nested in the form)', function () {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target">' +
+        '<form action="http://localhost:4560" id="target">' +
         '<input type="hidden" name="hello" value="goodbye" />' + 
           '<div><div><button class="submit">SUBMIT</button></div></div>' +
           '</form>'
@@ -363,7 +363,7 @@ describe('Applet:', function () {
 
     it('disables form before making AJAX call', function () {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4560" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
       app = new Applet( Applet.funcs.form );
       $('#THE_STAGE button.submit').click();
@@ -372,7 +372,7 @@ describe('Applet:', function () {
 
     it('re-enables form after AJAX response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4560" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
 
       function func(o) {
@@ -388,7 +388,7 @@ describe('Applet:', function () {
 
     it('by default, send form data using AJAX', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4560/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
 
       app = new Applet(
@@ -411,7 +411,7 @@ describe('Applet:', function () {
 
     it('adds .request.url to AJAX response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
+        '<form action="http://localhost:4560" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
 
       function func(o) {
@@ -427,7 +427,7 @@ describe('Applet:', function () {
 
     it('adds .request.data to AJAX response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target">' +
+        '<form action="http://localhost:4560" id="target">' +
         '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
@@ -444,7 +444,7 @@ describe('Applet:', function () {
 
     it('adds .request.headers to AJAX response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target">' +
+        '<form action="http://localhost:4560" id="target">' +
         '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
@@ -461,7 +461,7 @@ describe('Applet:', function () {
 
     it('adds .request.form_id to AJAX response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567" id="target">' +
+        '<form action="http://localhost:4560" id="target">' +
         '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
@@ -478,7 +478,7 @@ describe('Applet:', function () {
 
     it('sets .response', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567/json" id="target">' +
+        '<form action="http://localhost:4560/json" id="target">' +
         '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
@@ -495,7 +495,7 @@ describe('Applet:', function () {
 
     it('sets .response.error if content is invalid JSON', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567/string-as-html" id="target">' +
+        '<form action="http://localhost:4560/string-as-html" id="target">' +
         '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
@@ -512,7 +512,7 @@ describe('Applet:', function () {
 
     it('sets .response.error to {type: [\'server\'] if server error', function (done) {
       $('#THE_STAGE').html(
-        '<form action="http://localhost:4567/404-html" id="target">' +
+        '<form action="http://localhost:4560/404-html" id="target">' +
         '<input type="hidden" name="my_data" value="stargate" /><button class="submit">SUBMIT</button></form>'
       );
 
