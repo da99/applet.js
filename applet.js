@@ -475,7 +475,7 @@ var Applet = function () {
           e.preventDefault();
           e.stopPropagation();
 
-          promise.get('http://localhost:4560/_csrf').then(function (err, text) {
+          promise.get('/_csrf').then(function (err, text) {
             var data = form.serializeJSON();
             if (!err) {
               try {

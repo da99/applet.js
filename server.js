@@ -1,70 +1,78 @@
 "use strict";
-/* jshint undef: true, unused: true */
-/* global require */
+/* jshint esnext: true, undef: true, unused: true */
+/* global require, process */
 
 
-var http = require('http');
-var C    = console;
+var koa        = require('koa');
+var koa_static = require('koa-static');
+var router     = require('koa-router')();
+var port       = process.env.PORT || 4560;
+var app        = koa();
+var logger     = require('koa-logger');
 
+function json(app, o) {
+  app.set('Content-Type', 'application/json');
+  app.set('Access-Control-Allow-Origin', '*');
+  app.body = JSON.stringify(o);
+}
 
 //Create a server
-var server = http.createServer(
-  function (req, resp) {
-    var h = {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*'};
-    C.log(req.method + ' ' + req.url);
+app.use(logger());
+app.use(koa_static('.'));
 
-    switch (req.url) {
-
-      case "/":
-        resp.writeHead(200, h);
-        resp.end(JSON.stringify({when: 'for now'}));
-      break;
-
-      case "/_csrf":
-        resp.writeHead(200, h);
-        resp.end(JSON.stringify({_csrf: 'some_value'}));
-      break;
-
-      case "/html":
-        h['Content-Type'] = 'text/html';
-        resp.writeHead(200, h);
-        resp.end("<html><body>Some html.</body></html>");
-      break;
-
-      case "/404-html":
-        h['Content-Type'] = 'text/html';
-        resp.writeHead(404, h);
-        resp.end("<p>Not found: " + req.url + "</p>");
-      break;
-
-      case "/string-as-html":
-        h['Content-Type'] = 'text/html';
-        resp.writeHead(200, h);
-        resp.end("Some invalid html.");
-      break;
-
-      case "/text":
-        h['Content-Type'] = 'text/plain';
-        resp.writeHead(200, h);
-        resp.end("Some plain text.");
-      break;
-
-      case "/json":
-        resp.writeHead(200, h);
-        resp.end(JSON.stringify({msg: 'get smart'}));
-      break;
-
-      default:
-        resp.writeHead(404, h);
-        resp.end(JSON.stringify({msg: 'not found: ' + req.method + ' ' + req.url}));
-
-    } // === switch req.url
-  }
-);
-
-//Lets start our server
-var PORT = 4560;
-server.listen(PORT, function(){
-    //Callback triggered when server is successfully listening. Hurray!
-    C.log("Server listening on: http://localhost:%s", PORT);
+router.post('/', function* (next) {
+  json(this, {when: 'for now'});
+  yield next;
 });
+
+router.get('/_csrf', function* (next) {
+  json(this, {_csrf: 'some_value'});
+  yield next;
+});
+
+router.post('/html', function* (next) {
+  this.set('Content-Type', 'text/html');
+  this.body = "<html><body>Some html.</body></html>";
+  yield next;
+});
+
+router.post('/404-html', function* (next) {
+  this.set('Content-Type', 'text/html');
+  this.response.status = 404;
+  this.body = "<p>Not found: " + this.request.url + "</p>";
+  yield next;
+});
+
+router.post("/string-as-html", function* (next) {
+  this.set('Content-Type', 'text/html');
+  this.body = ("Some invalid html.");
+  yield next;
+});
+
+router.post("/text", function* (next) {
+  this.set('Content-Type', 'text/plain');
+  this.body = ("Some plain text.");
+  yield next;
+});
+
+router.post("/json", function* (next) {
+  json(this, {msg: 'get smart'});
+  yield next;
+});
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+app.use(function* (next) {
+  if (!this.body) {
+    this.response.status = 404;
+    json(this, {msg: 'not found: ' + this.request.method + ' ' + this.request.url});
+  }
+  yield next;
+});
+
+app.listen(port, function() {
+  console.warn("Server listening on: http://localhost:%s", port);
+});
+
+
+

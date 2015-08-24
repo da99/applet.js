@@ -64,9 +64,7 @@ case "$action" in
     IFS=$'\n'
     re='^[0-9]+$'
 
-    $0 jshint!
-
-    start_server
+    ( $0 jshint! && start_server ) || :
 
     echo "=== Watching..."
     inotifywait --quiet --monitor --event close_write  "./" "$0" | while read CHANGE

@@ -14,10 +14,14 @@
   "author": "da99",
   "license": "MIT",
   "engines": {
-    "iojs": "^2.3.3"
+    "iojs": "^3.0.0"
   },
   "devDependencies": {
-    "bower": "^1.4.1",
-    "jshint": "^2.8.0"
+    "bower": ">1.4.1",
+    "koa-static": ">=1.4.9",
+    "koa": ">=1.0.0",
+    "jshint": ">=2.8.0",
+    "koa-logger": ">0",
+    "koa-router": ">0"
   }
 }
