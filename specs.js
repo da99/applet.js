@@ -442,6 +442,24 @@ describe('Applet:', function () {
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.data to AJAX response
 
+    it('adds .request.data._csrf to AJAX response', function (done) {
+      $('#THE_STAGE').html(
+        '<form action="http://localhost:4560" id="target">' +
+        '<input type="hidden" name="my_data" value="movie" /><button class="submit">SUBMIT</button></form>'
+      );
+
+      function func(o) {
+        if (o.name === 'ajax response') {
+          expect(o.request.data).toEqual({my_data: 'movie', _csrf: 'some_value'});
+          done();
+        }
+      }
+
+      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      $('#THE_STAGE button.submit').click();
+    }, 1000); // === it adds .request.data to AJAX response
+
+
     it('adds .request.headers to AJAX response', function (done) {
       $('#THE_STAGE').html(
         '<form action="http://localhost:4560" id="target">' +
