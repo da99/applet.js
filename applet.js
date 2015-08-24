@@ -474,15 +474,27 @@ var Applet = function () {
           form.prop('disabled', true);
           e.preventDefault();
           e.stopPropagation();
-          a.run({
-            name    : 'ajax',
-            'send?' : true,
-            form_id : form.attr('id'),
-            url     : form.attr('action'),
-            headers : {"Accept": "application/json"},
-            data    : form.serializeJSON()
+
+          promise.get('http://localhost:4560/_csrf').then(function (err, text) {
+            var data = form.serializeJSON();
+            if (!err) {
+              try {
+                data._csrf = JSON.parse(text)._csrf || "";
+              } catch (e) {
+              }
+            }
+
+            a.run({
+              name    : 'ajax',
+              'send?' : true,
+              form_id : form.attr('id'),
+              url     : form.attr('action'),
+              headers : {"Accept": "application/json"},
+              data    : data
+            });
           });
-        };
+
+        }; // === return function
       };
     } // === if this_func
 

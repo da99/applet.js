@@ -337,7 +337,7 @@ describe('Applet:', function () {
 
   describe('forms:', function () {
 
-    it('adds handlers to buttons (even when deeply nested in the form)', function () {
+    it('adds handlers to buttons (even when deeply nested in the form)', function (done) {
       $('#THE_STAGE').html(
         '<form action="http://localhost:4560" id="target">' +
         '<input type="hidden" name="hello" value="goodbye" />' + 
@@ -348,18 +348,18 @@ describe('Applet:', function () {
       app = new Applet(
         function (o) {
           if (o.name === 'ajax') {
-            result = o.data.hello;
             o['send?'] = false;
+            expect(o.data.hello).toEqual('goodbye');
+            done();
           }
         },
         Applet.funcs.form,
         Applet.funcs.ajax
       );
-      var result = null;
 
       $('#THE_STAGE button.submit').click();
-      expect(result).toEqual('goodbye');
-    }); // === it adds handlers to buttons
+
+    }, 1000); // === it adds handlers to buttons
 
     it('disables form before making AJAX call', function () {
       $('#THE_STAGE').html(
@@ -433,7 +433,7 @@ describe('Applet:', function () {
 
       function func(o) {
         if (o.name === 'ajax response') {
-          expect(o.request.data).toEqual({my_data: 'stargate'});
+          expect(o.request.data).toEqual({my_data: 'stargate', _csrf: 'some_value'});
           done();
         }
       }

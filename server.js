@@ -20,6 +20,11 @@ var server = http.createServer(
         resp.end(JSON.stringify({when: 'for now'}));
       break;
 
+      case "/_csrf":
+        resp.writeHead(200, h);
+        resp.end(JSON.stringify({_csrf: 'some_value'}));
+      break;
+
       case "/html":
         h['Content-Type'] = 'text/html';
         resp.writeHead(200, h);
