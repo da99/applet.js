@@ -12,7 +12,7 @@ set -u -e -o pipefail
 # ==============================================================
 # http://www.ibm.com/developerworks/aix/library/au-learningtput/
 green=$(tput setaf 2)
-green_bg=$(tput setb 2)
+green_bg=$(tput setab 2)
 white=$(tput setaf 7)
 bold_white_on_green=$(tput bold)${white}${green_bg}
 bold_white=$(tput bold)${white}
