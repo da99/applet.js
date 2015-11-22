@@ -16,6 +16,10 @@ function outer_html(raw) {
 
 var app;
 
+var Default_App = function () {
+  return new Applet( 'dom', _.toArray(arguments) );
+};
+
 describe('Applet:', function () {
 
   beforeEach(function () {
@@ -197,7 +201,7 @@ describe('Applet:', function () {
     it('sets node to display=none by default', function () {
       $('#THE_STAGE')
       .html('<div id="target" data-show_if="logged_in?">logged</div>');
-      app = new Applet(Applet.funcs.show_if);
+      app = new Default_App(Applet.funcs.show_if);
       expect(
         $('#target').css('display')
       ).toEqual('none');
@@ -207,7 +211,7 @@ describe('Applet:', function () {
       $('#THE_STAGE')
       .html('<div id="target" data-show_if="logged_in?">logged</div>');
 
-      app = new Applet(Applet.funcs.show_if);
+      app = new Default_App(Applet.funcs.show_if);
       app.run('data', {'logged_in?': true});
 
       expect(
@@ -222,7 +226,7 @@ describe('Applet:', function () {
     it('does not alter css display by default', function () {
       $('#THE_STAGE')
       .html('<div id="target" data-hide_if="loaded?">logging</div>');
-      app = new Applet(Applet.funcs.hide_if);
+      app = new Default_App(Applet.funcs.hide_if);
       expect(
         $('#target').css('display')
       ).toEqual('block');
@@ -232,7 +236,7 @@ describe('Applet:', function () {
       $('#THE_STAGE')
       .html('<div id="target" data-hide_if="loaded?">Loading</div>');
 
-      app = new Applet(Applet.funcs.hide_if);
+      app = new Default_App(Applet.funcs.hide_if);
       app.run('data', {'loaded?': true});
 
       expect(
@@ -250,7 +254,7 @@ describe('Applet:', function () {
         '<script type="text/mustache/num">{{num.word}} {{num.num}}</script>'
       );
 
-      app = new Applet(Applet.funcs.template);
+      app = new Default_App(Applet.funcs.template);
 
       expect(
         _.map($('#THE_STAGE').children(), function (n) {
@@ -264,7 +268,7 @@ describe('Applet:', function () {
         '<script type="text/mustache/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      (app = new Applet(Applet.funcs.template))
+      (app = new Default_App(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: 1}})
       ;
 
@@ -278,7 +282,7 @@ describe('Applet:', function () {
         '<script id="target" type="text/mustache/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      (app = new Applet(Applet.funcs.template))
+      (app = new Default_App(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: Date.now().toString()}})
       .run('data', {num: {word: 'two', num: 2}})
       ;
@@ -294,7 +298,7 @@ describe('Applet:', function () {
         '<script type="text/mustache-top/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      (app = new Applet(Applet.funcs.template))
+      (app = new Default_App(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: 1}})
       .run('data', {num: {word: 'two', num: 2}})
       ;
@@ -308,7 +312,7 @@ describe('Applet:', function () {
         '<script type="text/mustache-bottom/num"><div>{{num.word}} {{num.num}}</div></script>'
       );
 
-      (app = new Applet(Applet.funcs.template))
+      (app = new Default_App(Applet.funcs.template))
       .run('data', {num: {word: 'one', num: 1}})
       .run('data', {num: {word: 'two', num: 2}})
       .run('data', {num: {word: 'three', num: 3}})
@@ -324,7 +328,7 @@ describe('Applet:', function () {
         '<script type="text/mustache/num"><div id="target"><span data-show_if="show_num?">{{num.word}}</span></div></script>'
       );
 
-      (app = new Applet(_.values(Applet.funcs)))
+      (app = new Default_App(_.values(Applet.funcs)))
       .run('data', {'show_num?': true, num: {word: 'number'}})
       ;
 
@@ -352,7 +356,7 @@ describe('Applet:', function () {
           '</form>'
       );
 
-      app = new Applet(
+      app = new Default_App(
         function (o, data) {
           if (o.name === 'ajax') {
             o['send?'] = false;
@@ -372,7 +376,7 @@ describe('Applet:', function () {
       $('#THE_STAGE').html(
         '<form action="http://localhost:4560" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
-      app = new Applet( Applet.funcs.form );
+      app = new Default_App( Applet.funcs.form );
       $('#THE_STAGE button.submit').click();
       expect( $('#target').prop('disabled') ).toEqual( true );
     }); // === it disables form before making AJAX call
@@ -389,7 +393,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet( Applet.funcs.form, func, Applet.funcs.ajax );
+      app = new Default_App( Applet.funcs.form, func, Applet.funcs.ajax );
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it re-enables form after AJAX response
 
@@ -398,7 +402,7 @@ describe('Applet:', function () {
         '<form action="http://localhost:4560/" id="target"><input type="hidden" name="hello" value="goodbye" /><button class="submit">SUBMIT</button></form>'
       );
 
-      app = new Applet(
+      app = new Default_App(
         Applet.funcs.form,
         Applet.funcs.ajax,
         function (o) {
@@ -428,7 +432,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.url to AJAX response
 
@@ -445,7 +449,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.data to AJAX response
 
@@ -462,7 +466,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.data to AJAX response
 
@@ -480,7 +484,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.headers to AJAX response
 
@@ -497,7 +501,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }, 1000); // === it adds .request.form_id to AJAX response
 
@@ -514,7 +518,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }); // === it sets .response
 
@@ -531,7 +535,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }); // === it sets .response.error if content is invalid JSON
 
@@ -548,7 +552,7 @@ describe('Applet:', function () {
         }
       }
 
-      app = new Applet(Applet.funcs.form, Applet.funcs.ajax, func);
+      app = new Default_App(Applet.funcs.form, Applet.funcs.ajax, func);
       $('#THE_STAGE button.submit').click();
     }); // === it sets .response.error to {type: [\'server\'] if server error
 

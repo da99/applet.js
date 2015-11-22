@@ -9,10 +9,20 @@ var Applet = function () {
 
   i.data_cache = {};
 
-  i.new_func(_.flatten(_.toArray(arguments)));
+  var args    = _(arguments).toArray().flatten().value();
+  var actions = [];
 
-  i.run('constructor');
-  i.run('dom');
+  _.each(args, function (val) {
+    if (_.isString(val)) {
+      actions.push(val);
+    } else {
+      i.new_func(val);
+    }
+  });
+
+  _.each(actions, function (act) {
+    i.run(act);
+  });
 }; // === Applet constructor ===========================
 
 (function () { // === scope ==============================
@@ -202,7 +212,7 @@ var Applet = function () {
         name   : Applet.standard_name(first.name),
         applet : instance
       });
-      name = first.name
+      name = first.name;
     } else {
       meta = {
         name   : Applet.standard_name(first),
