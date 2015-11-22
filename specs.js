@@ -351,7 +351,7 @@ describe('Applet:', function () {
     it('adds handlers to buttons (even when deeply nested in the form)', function (done) {
       $('#THE_STAGE').html(
         '<form action="http://localhost:4560" id="target">' +
-        '<input type="hidden" name="hello" value="goodbye" />' + 
+        '<input type="hidden" name="hello" value="goodbye" />' +
           '<div><div><button class="submit">SUBMIT</button></div></div>' +
           '</form>'
       );

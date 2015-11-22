@@ -1,0 +1,35 @@
+{
+  "name": "da99_applet_js",
+  "version": "0.0.0",
+  "dependencies": {
+    "co": {
+      "version": "4.5.4",
+      "from": "co@*",
+      "resolved": "https://registry.npmjs.org/co/-/co-4.5.4.tgz"
+    },
+    "mz": {
+      "version": "2.0.0",
+      "from": "mz@*",
+      "resolved": "https://registry.npmjs.org/mz/-/mz-2.0.0.tgz",
+      "dependencies": {
+        "native-or-bluebird": {
+          "version": "1.2.0",
+          "from": "native-or-bluebird@>=1.0.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/native-or-bluebird/-/native-or-bluebird-1.2.0.tgz"
+        },
+        "thenify-all": {
+          "version": "1.6.0",
+          "from": "thenify-all@>=1.0.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/thenify-all/-/thenify-all-1.6.0.tgz",
+          "dependencies": {
+            "thenify": {
+              "version": "3.1.0",
+              "from": "thenify@>=3.1.0 <4.0.0",
+              "resolved": "https://registry.npmjs.org/thenify/-/thenify-3.1.0.tgz"
+            }
+          }
+        }
+      }
+    }
+  }
+}
