@@ -17,7 +17,7 @@ function outer_html(raw) {
 var app;
 
 var Default_App = function () {
-  return new Applet( 'dom', _.toArray(arguments) );
+  return new Applet( _.toArray(arguments), 'dom' );
 };
 
 describe('Applet:', function () {

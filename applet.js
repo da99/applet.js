@@ -9,19 +9,22 @@ var Applet = function () {
 
   i.data_cache = {};
 
-  var args    = _(arguments).toArray().flatten().value();
-  var actions = [];
+  var args    = _(arguments).toArray().flattenDeep().value();
 
   _.each(args, function (val) {
     if (_.isString(val)) {
-      actions.push(val);
+      i.run(val);
     } else {
-      i.new_func(val);
+      if (_.isFunction(val)) {
+        i.new_func(val);
+      } else {
+        throw new Error(
+          "Not a function." +
+            "Only strings and functions allowed in constructor: " +
+              typeof(val) + " -> " + val
+        );
+      }
     }
-  });
-
-  _.each(actions, function (act) {
-    i.run(act);
   });
 }; // === Applet constructor ===========================
 

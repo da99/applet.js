@@ -46,24 +46,25 @@ because it will take some time to finish the documentation (i.e. this README fil
 Here is an example of using Applet.js:
 
 ```javascript
-  var my_app = new Applet(
-    "dom",                  // === You can also pass Strings here. They run after all
-                            //     other functions have been added.
-    _.values(Applet.funcs), // === default functions that come w/Applet.js.
-    my_func,                // === accepts a function.
-    my_array_of_funcs       // === accepts an Array of functions.
-  );
+  var My_App = function () {
 
-  // === Get some data,
-  //     maybe from the result of an AJAX call
-  my_app.run(
-    "my new data",
-    {"name": "Bob Wiley", "movie": "What About Bob?"}
-  );
+    var my_app = new Applet(
+      _.values(Applet.funcs), // === Optional: functions that come w/Applet.js.
+      "dom",                  // === You can also pass Strings here.
+      my_func,                // === accepts a function.
+      my_array_of_funcs       // === accepts an Array of functions.
+    );
 
-  my_app.run("my array", [1,2,3]);
+    my_app.run(
+      "my init",
+      {"name": "Bob Wiley", "movie": "What About Bob?"}
+    );
 
-  my_app.run("whatever", "I'm single. Let's go out.");
+    my_app.run("my action", [1,2,3]);
+    my_app.run("whatever", "I'm single. Let's go out.");
+
+    return my_app;
+  };
 
 ```
 
