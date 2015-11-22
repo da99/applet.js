@@ -182,20 +182,20 @@ var Applet = function () {
 
   // === Examples:
   //
-  // .run('str')               => {name: 'str'}
-  // .run('str', {...})        => {name: 'str', data: {...}}
-  // .run({name: 'str', ... }) => {name: 'str', ... }
+  // .run(name, 'str')               => {name: 'str'}
+  // .run(name, 'str', {...})        => {name: 'str', data: {...}}
+  // .run(name, {name: 'str', ... }) => {name: 'str', ... }
   //
-  Applet.prototype.run = function (msg, data) {
+  Applet.prototype.run = function (name, data) {
 
     var o = null;
     var instance = this;
 
-    if (_.isPlainObject(msg)) {
-      o = msg;
+    if (_.isPlainObject(name)) {
+      o = name;
     } else { // === is String
       o = {
-        name : Applet.standard_name(msg),
+        name : Applet.standard_name(name),
         data : data
       };
     }
