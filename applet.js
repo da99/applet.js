@@ -186,36 +186,34 @@ var Applet = function () {
   // .run(name, 'str', {...})        => {name: 'str', data: {...}}
   // .run(name, {name: 'str', ... }) => {name: 'str', ... }
   //
-  Applet.prototype.run = function (name, data) {
+  Applet.prototype.run = function () {
 
-    var o = null;
+    var raw_args = _.toArray(arguments);
+
+    var name = raw_args[0]
+    var args = _.slice(raw_args, 1);
+
     var instance = this;
 
-    if (_.isPlainObject(name)) {
-      o = name;
-    } else { // === is String
-      o = {
-        name : Applet.standard_name(name),
-        data : data
-      };
-    }
+    var meta = {
+      name   : Applet.standard_name(name),
+      data   : args[0],
+      applet : instance
+    };
 
-    o.applet = instance;
 
-    o.name = Applet.standard_name(o.name);
-
-    if (o.name === 'data' && o.data)
-      instance.data_cache = _.extend(instance.data_cache, o.data);
+    if (meta.name === 'data' && _.isPlainObject(meta.data))
+      instance.data_cache = _.extend(instance.data_cache, meta.data);
 
     var i = 0, f;
 
     while (instance.funcs[i]) {
-      f             = instance.funcs[i];
-      o.this_config = instance.config_for_func(f);
-      o.this_func   = f;
-      o.data_cache  = instance.data_cache;
+      f                = instance.funcs[i];
+      meta.this_config = instance.config_for_func(f);
+      meta.this_func   = f;
+      meta.data_cache  = instance.data_cache;
 
-      f(o);
+      f.apply(null, [meta].concat(args));
       ++i;
     }
 
@@ -323,6 +321,7 @@ var Applet = function () {
 
   // === show_if ====================
   Applet.funcs.show_if = function (o) {
+
     if (o.name !== 'dom') return;
 
     var selector   = '*[data-show_if]';
