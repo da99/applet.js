@@ -3,6 +3,13 @@
 /* global Applet, describe, it, expect, beforeEach */
 
 
+var log;
+log = Applet.log = function () {
+  if (window.console)
+    return console.log.apply(console, arguments);
+  return this;
+};
+
 function outer_html(raw) {
   return raw.map(function () { return $(this).prop('outerHTML'); }).toArray().join('');
 }
@@ -346,10 +353,10 @@ describe('Applet:', function () {
       );
 
       app = new Applet(
-        function (o) {
+        function (o, data) {
           if (o.name === 'ajax') {
             o['send?'] = false;
-            expect(o.data.hello).toEqual('goodbye');
+            expect(data.hello).toEqual('goodbye');
             done();
           }
         },

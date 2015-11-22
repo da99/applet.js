@@ -182,32 +182,30 @@ var Applet = function () {
 
   // === Examples:
   //
-  // .run(name, 'str')               => {name: 'str'}
-  // .run(name, 'str', {...})        => {name: 'str', data: {...}}
-  // .run(name, {name: 'str', ... }) => {name: 'str', ... }
+  // .run(name, 'str')
+  // .run(name, 'str', {...})
+  // .run({name: 'str', ... more meta data}, ...data args)
   //
   Applet.prototype.run = function () {
 
     var raw_args = _.toArray(arguments);
 
-    var name = raw_args[0];
-    var args = _.slice(raw_args, 1);
+    var first = raw_args[0];
+    var args  = _.slice(raw_args, 1);
 
     var instance = this;
 
-    var meta;
+    var meta, name;
 
-    if (_.isPlainObject(name)) {
-      meta = _.extend(name, {
-        name   : Applet.standard_name(name.name),
-        data   : name,
+    if (_.isPlainObject(first)) {
+      meta = _.extend(first, {
+        name   : Applet.standard_name(first.name),
         applet : instance
       });
-      name = name.name
+      name = first.name
     } else {
       meta = {
-        name   : Applet.standard_name(name),
-        data   : args[0],
+        name   : Applet.standard_name(first),
         applet : instance
       };
     }
@@ -215,8 +213,8 @@ var Applet = function () {
     if (!_.isString(meta.name))
       throw new Error(":name must be a String: " + meta.name.toString());
 
-    if (meta.name === 'data' && _.isPlainObject(meta.data))
-      instance.data_cache = _.extend(instance.data_cache, meta.data);
+    if (meta.name === 'data' && _.isPlainObject(args[0]))
+      instance.data_cache = _.extend(instance.data_cache, args[0]);
 
     var i = 0, f;
 
@@ -304,8 +302,8 @@ var Applet = function () {
       };
 
       o.applet.new_func(
-        function (o) {
-          if (o.name !== 'data' || !_.isPlainObject(o.data[meta.key]))
+        function (o, data) {
+          if (o.name !== 'data' || !_.isPlainObject(data[meta.key]))
             return;
 
           // === Remove old nodes:
@@ -313,7 +311,7 @@ var Applet = function () {
             meta.elements.remove();
           }
 
-          var html = $(meta.mustache.render(o.data));
+          var html = $(meta.mustache.render(data));
           if (meta.pos === 'replace' || meta.pos === 'bottom')
             html.insertBefore($('#' + meta.placeholder_id));
           else
@@ -350,10 +348,10 @@ var Applet = function () {
       var the_id  = Applet.dom_id(node);
 
       o.applet.new_func(
-        function (o) {
+        function (o, data) {
           if (o.name !== 'data') return;
 
-          switch (Applet.is_true(o.data, the_key)) {
+          switch (Applet.is_true(data, the_key)) {
             case true:
               $('#' + the_id).show();
             return;
@@ -387,10 +385,10 @@ var Applet = function () {
       var id  = Applet.dom_id(node);
 
       o.applet.new_func(
-        function (o) {
+        function (o, data) {
           if (o.name !== 'data') return;
 
-          switch (Applet.is_true(o.data, key)) {
+          switch (Applet.is_true(data, key)) {
             case true:
               $('#' + id).hide();
             return;
@@ -407,13 +405,13 @@ var Applet = function () {
 
 
   // === ajax =====================
-  Applet.funcs.ajax = function (o) {
+  Applet.funcs.ajax = function (o, data) {
 
     switch (o.name) {
 
       case 'ajax':
         if (o['send?']) {
-          o.promise = promise.post(o.url, o.data, o.headers);
+          o.promise = promise.post(o.url, data, o.headers);
           o.promise.then(function (err, text, xhr) {
             o.applet.run({
               name: 'ajax response',
@@ -421,7 +419,7 @@ var Applet = function () {
               request : {
                 form_id : o.form_id,
                 url     : o.url,
-                data    : o.data,
+                data    : data,
                 headers : o.headers
               },
               promise: o.promise
@@ -500,8 +498,7 @@ var Applet = function () {
               form_id : form.attr('id'),
               url     : form.attr('action'),
               headers : {"Accept": "application/json"},
-              data    : data
-            });
+            }, data);
           });
 
         }; // === return function
