@@ -71,6 +71,7 @@ These can be found in `Applet.funcs`:
    Applet.funcs = {
       show_if: function (name, val) {...},
       hide_if: function (name, val) {...},
+      ...
    };
 ```
 
@@ -80,14 +81,30 @@ These can be found in `Applet.funcs`:
 In your HTML, add `data-` attributes:
 
 ```html
-  <div id="loading" data-hide_if="page_loaded?">
+  <div id="loading" data-hide_if="my_val?">
     Loading...
-  </div>
-
-  <div class="hidden block" data-show_if="logged_in?">
-    <p>You are logged in.</p>
   </div>
 ```
 
+In your script:
+```
+   my_app.run("dom", {"my_val?": true});
+```
+
+"hide\_if"
+----------
+
+In your HTML, add `data-` attributes:
+
+```html
+  <div id="loading" data-hide_if="my_val?">
+    Loading...
+  </div>
+```
+
+In your script:
+```
+   my_app.run("dom", {"my_val?": true});
+```
 
 
