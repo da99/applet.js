@@ -325,7 +325,7 @@ describe('Applet:', function () {
         $('#target span').css('display')
       ).toEqual('inline');
 
-      app.run('data', {'show_num?' : false});
+      app.run('data', {'show_num?' : false, num: {word: 'number'}});
 
       expect(
         $('#target span').css('display')

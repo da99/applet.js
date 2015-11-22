@@ -190,17 +190,30 @@ var Applet = function () {
 
     var raw_args = _.toArray(arguments);
 
-    var name = raw_args[0]
+    var name = raw_args[0];
     var args = _.slice(raw_args, 1);
 
     var instance = this;
 
-    var meta = {
-      name   : Applet.standard_name(name),
-      data   : args[0],
-      applet : instance
-    };
+    var meta;
 
+    if (_.isPlainObject(name)) {
+      meta = _.extend(name, {
+        name   : Applet.standard_name(name.name),
+        data   : name,
+        applet : instance
+      });
+      name = name.name
+    } else {
+      meta = {
+        name   : Applet.standard_name(name),
+        data   : args[0],
+        applet : instance
+      };
+    }
+
+    if (!_.isString(meta.name))
+      throw new Error(":name must be a String: " + meta.name.toString());
 
     if (meta.name === 'data' && _.isPlainObject(meta.data))
       instance.data_cache = _.extend(instance.data_cache, meta.data);
@@ -226,15 +239,15 @@ var Applet = function () {
     var i   = this;
 
     _.each(arr, function (f) {
+
       if (!_.isFunction(f))
         throw new Error('Error: Not a function');
+
       if (f({name : 'this position', applet: i}) === 'top')
         i.funcs.unshift(f);
       else
         i.funcs.push(f);
     });
-
-
 
     return this;
   };
