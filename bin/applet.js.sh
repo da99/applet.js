@@ -35,14 +35,12 @@ Orange='\e[0;33m'
 # ==============================================================
 start_server () {
   shutdown_server
-  if ! lsof -i :$PORT ; then
-    (node server.js) &
-    server_pid="$!"
+  (node server.js) &
+  server_pid="$!"
 
-    mkdir -p tmp
-    echo "$server_pid" > tmp/pid.txt
-    echo "=== Started server: $server_pid - $$"
-  fi
+  mkdir -p tmp
+  echo "$server_pid" > tmp/pid.txt
+  echo "=== Started server: $server_pid - $$"
 }
 
 shutdown_server () {
