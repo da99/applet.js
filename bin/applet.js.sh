@@ -4,8 +4,15 @@
 #
 orig_args="$@"
 action="$1"
-server_pid=""
+
+if [[ -z "$PORT" ]]; then
+  PORT=4560
+fi
+
+export PORT="$PORT"
 shift
+
+
 set -u -e -o pipefail
 
 
@@ -27,18 +34,27 @@ Orange='\e[0;33m'
 
 # ==============================================================
 start_server () {
-  (iojs server.js) &
-  server_pid="$!"
-  echo "=== Started server: $server_pid - $$"
+  shutdown_server
+  if ! lsof -i :$PORT ; then
+    (node server.js) &
+    server_pid="$!"
+
+    mkdir -p tmp
+    echo "$server_pid" > tmp/pid.txt
+    echo "=== Started server: $server_pid - $$"
+  fi
 }
 
 shutdown_server () {
-  if [[ ! -z "$server_pid"  ]]; then
-    if kill -0 "$server_pid" 2>/dev/null; then
-      echo "=== Shutting server down: $server_pid - $$ ..."
-      kill -SIGINT "$server_pid"
-      server_pid=""
+  if [[ -f "tmp/pid.txt"  ]]; then
+    pid="$(cat tmp/pid.txt)"
+    if [[ -n "$pid" ]]; then
+      if kill -0 "$pid" 2>/dev/null; then
+        echo "=== Shutting server down: $pid - $$ ..."
+        kill -SIGINT "$pid"
+      fi
     fi
+    rm tmp/pid.txt || :
   fi
 }
 

@@ -209,8 +209,6 @@ var Applet = function () {
 
     var i = 0, f;
 
-    // if (o.name.indexOf('ajax') > -1)
-    // log(instance)
     while (instance.funcs[i]) {
       f             = instance.funcs[i];
       o.this_config = instance.config_for_func(f);

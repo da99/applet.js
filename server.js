@@ -6,7 +6,7 @@
 var koa        = require('koa');
 var koa_static = require('koa-static');
 var router     = require('koa-router')();
-var port       = process.env.PORT || 4560;
+var port       = parseInt(process.env.PORT);
 var app        = koa();
 var logger     = require('koa-logger');
 
