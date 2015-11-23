@@ -15,7 +15,11 @@
     "css",
     "test",
     "tests",
-    "specs.js"
+    "specs.js",
+    "specs.html",
+    "npm-shrinkwrap.json",
+    "package.json",
+    "servers.js"
   ],
   "devDependencies": {
     "jasmine": ">2.0.0"
