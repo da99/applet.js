@@ -156,11 +156,13 @@ Your HTML:
   <script type="text/mustache/my_name">
      &lt;p&gt;  My content. &gt;p&lt;
   </script>
-  // -- or --
-  <script type="text/mustache-bottom/my_name"> &lt;p&gt;  My content. &gt;p&lt; </script>
-  // -- or --
   <script type="text/mustache-top/my_name"> &lt;p&gt;  My content. &gt;p&lt; </script>
 ```
+
+For `type` attribute:
+  * "text/_mustache_/my\_template\_name" : Template will be replaced.
+  * "text/_mustache-top_/my\_template\_name" : Template will be re-generated and placed at top.
+  * "text/_mustache-bottom_/my\_template\_name" : Template will be always be re-generated and placed at bottom.
 
 Your Javascript:
 ```javascript
