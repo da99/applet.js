@@ -170,3 +170,42 @@ Your Javascript:
   my_app.run("dom");
   my_app.run("data", {my_name : {my_val : "Howdy, neighbor." } });
 ```
+
+Applet Helpers
+==============
+
+"new\_id"
+-------
+```javascript
+  Applet.new_id() // -> 0
+  Applet.new_id() // -> 1
+  Applet.new_id('my_ele_') // -> "my_ele_2"
+  Applet.new_id('my_ele_') // -> "my_ele_3"
+```
+
+"dom\_id"
+---------
+
+Returns string to be used as an `id=` attribute.
+Sets id of element if no id is set. Uses `Applet.new_id`
+to help generate the id.
+
+```javascript
+  Applet.dom_id( jquery_or_html_element )  -> "id_for_applet_0";
+  Applet.dom_id( 'prefix', jquery_or_html_element ) -> "prefix1";
+```
+
+"mark\_as\_compiled"
+-------------------
+
+```javascript
+  Applet.mark_as_compiled("show_if", jquery_or_html_element);
+```
+
+"find"
+-------------------
+
+```javascript
+  Applet.find("show_if", '*[data-show_if]');
+  Applet.find("show_if", '*[data-show_if]', $('.my_target'));
+```
