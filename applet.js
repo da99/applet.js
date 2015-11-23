@@ -427,7 +427,7 @@ var Applet = function () {
           o.promise = promise.post(o.url, data, o.headers);
           o.promise.then(function (err, text, xhr) {
             o.applet.run({
-              name: 'ajax response',
+              name: 'ajax raw response',
               raw_response: {err: err, text: text, xhr: xhr},
               request : {
                 form_id : o.form_id,
@@ -441,8 +441,9 @@ var Applet = function () {
         }
       break;
 
-      case 'ajax response':
+      case 'ajax raw response':
         if (!o.response && o.raw_response) {
+          var raw        = o.raw_response;
           var status     = o.raw_response.xhr && o.raw_response.xhr.status;
           var err        = o.raw_response.err;
           var err_tags   = [];
@@ -451,11 +452,14 @@ var Applet = function () {
             err_tags.push(status);
           }
 
-          o.response = {};
+          var new_o = _.extend(o, {
+            name     : "ajax response",
+            response : {}
+          });
 
           var json;
           try {
-            json = JSON.parse(o.raw_response.text);
+            json = JSON.parse(raw.text);
           } catch(e) {
             err = true;
             if (_.isEmpty(err_tags))
@@ -463,10 +467,12 @@ var Applet = function () {
           }
 
           if (err)
-            o.response = {error: {tags: err_tags, msg: o.raw_response.text}};
+            new_o.response = {error: {tags: err_tags, msg: raw.text}};
           else
-            o.response = json;
-        }
+            new_o.response = json;
+
+          o.applet.run(new_o, new_o.response);
+        } // if !o.response && !o.raw_response
       break;
 
     } // === switch o.name
