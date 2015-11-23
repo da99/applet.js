@@ -160,8 +160,8 @@ Your HTML:
 ```
 
 For `type` attribute:
-  * "text/**mustache**/my\_name" : Template will be replaced.
-  * "text/**mustache-top**/my\_name" : Template will be re-generated and placed at top.
+  * "text/**mustache**/my\_name"        : Template will be always be replaced.
+  * "text/**mustache-top**/my\_name"    : Template will be always re-generated and placed at top.
   * "text/**mustache-bottom**/my\_name" : Template will be always be re-generated and placed at bottom.
 
 Your Javascript:
