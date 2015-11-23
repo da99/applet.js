@@ -308,7 +308,7 @@ var Applet = function () {
         id             : id,
         key            : data_key,
         html           : html,
-        mustache       : Mustache.parse(html),
+        mustache       : html,
         placeholder_id : placeholder_id,
         elements       : null,
         pos            : pos
