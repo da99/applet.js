@@ -168,6 +168,23 @@ var Applet = function () {
     return arr;
   }; // === func
 
+  Applet.key_compiled_for_applet = 'data-compiled_for_applet';
+
+  Applet.mark_as_compiled = function (arr, name) {
+    _.each(arr, function (raw_e) {
+      var e         = $(raw_e);
+      var key       = Applet.key_compiled_for_applet;
+      var old_value = e.attr(key) || '';
+      e.attr(key, old_value + ' ' + name);
+    }); // === each
+
+    return arr;
+  }; // === func
+
+  Applet.find = function (name, raw_selector, target) {
+    var selector = raw_selector + ':not(*[' + Applet.key_compiled_for_applet + '~="' + name + '"])';
+    return $(target || $('body')).find(selector).addBack(selector);
+  }; // === func
 
   // =====================================================
   // === PROTOTYPE
@@ -272,14 +289,15 @@ var Applet = function () {
 
   // === template ====================
   Applet.funcs.template = function (o) {
+    var this_name = "applet.template.mustache"
     if (o.name === 'this position')
       return 'top';
 
     if (o.name !== 'dom')
       return;
 
-    var selector    = 'script[type^="text/mustache"]:not(script.compiled)';
-    var scripts     = (o.target || $('body')).find(selector).addBack(selector);
+    var scripts = Applet.find(this_name, 'script[type^="text/mustache"]', o.target);
+
     if (scripts.length < 1)
       return;
 
@@ -292,7 +310,7 @@ var Applet = function () {
       var id             = Applet.dom_id(t, 'mustache_templates_' + (data_key || ''));
       var pos            = 'replace';
 
-      t.addClass('compiled');
+      Applet.mark_as_compiled(t, this_name);
 
       switch (_.trim(types[1])) {
         case 'mustache-top':
@@ -452,7 +470,7 @@ var Applet = function () {
             err_tags.push(status);
           }
 
-          var new_o = _.extend(o, {
+          var new_o = _.extend({}, o, {
             name     : "ajax response",
             response : {}
           });
