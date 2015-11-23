@@ -154,7 +154,7 @@ Javascript:
 Your HTML:
 ```HTML
   <script type="text/mustache/my_name">
-     &lt;p&gt;  My content. &gt;p&lt;
+     &lt;p&gt;  My mustache val: &quot;{{my_val}}&quot;. &gt;p&lt;
   </script>
   <script type="text/mustache-top/my_name"> &lt;p&gt;  My content. &gt;p&lt; </script>
 ```
@@ -168,5 +168,5 @@ Your Javascript:
 ```javascript
   var my_app = new Applet(Applet.funcs.template);
   my_app.run("dom");
-  my_app.run("data", {my_name : {... my vals...} });
+  my_app.run("data", {my_name : {my_val : "Howdy, neighbor." } });
 ```
