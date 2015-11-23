@@ -25,10 +25,10 @@
     "jasmine": ">2.0.0"
   },
   "dependencies": {
-    "jquery": ">2.0.0",
-    "lodash": ">3.0.0",
-    "hogan.js": "twitter/hogan.js#~3.0.2",
-    "jquery.serializeJSON": ">2.6.0",
+    "jquery": "^2",
+    "lodash": "^3",
+    "mustache": "^2",
+    "jquery.serializeJSON": "^2",
     "promisejs": "stackp/promisejs"
   }
 }

@@ -61,11 +61,24 @@ shutdown_server () {
 # ===============================================
 case "$action" in
 
-  "help")
+  "help"|"--help")
     echo ""
+    echo "  $  deploy # for both dev and prod"
     echo "  $  watch"
     echo ""
     exit 0
+    ;;
+
+  "server")
+    start_server
+    ;;
+
+  "deploy")
+    npm install
+    npm update
+    npm prune
+    node_modules/bower/bin/bower install
+    node_modules/bower/bin/bower update
     ;;
 
   "jshint!")

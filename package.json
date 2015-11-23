@@ -14,11 +14,10 @@
   "author": "da99",
   "license": "MIT",
   "devDependencies": {
-    "bower": ">1.4.1",
-    "koa-static": ">=1.4.9",
-    "koa": ">=1.0.0",
-    "jshint": ">=2.8.0",
-    "koa-logger": ">0",
-    "koa-router": ">0"
+    "bower": "^1",
+    "express": "^4.13.3",
+    "serve-static": "^1.10.0",
+    "morgan": "~1",
+    "jshint": ">=2.8.0"
   }
 }

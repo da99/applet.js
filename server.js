@@ -3,71 +3,61 @@
 /* global require, process */
 
 
-var koa        = require('koa');
-var koa_static = require('koa-static');
-var router     = require('koa-router')();
-var port       = parseInt(process.env.PORT);
-var app        = koa();
-var logger     = require('koa-logger');
+const app          = require('express')();
+const serve_static = require('serve-static')('.');
+const port         = parseInt(process.env.PORT);
+const logger       = require('morgan')('dev');
 
 function json(app, o) {
   app.set('Content-Type', 'application/json');
   app.set('Access-Control-Allow-Origin', '*');
-  app.body = JSON.stringify(o);
+  app.send( JSON.stringify(o) );
 }
 
 //Create a server
-app.use(logger());
-app.use(koa_static('.'));
+app.use(logger);
+app.use(serve_static);
 
-router.post('/', function* (next) {
-  json(this, {when: 'for now'});
-  yield next;
+app.post('/', function (req, resp) {
+  json(resp, {when: 'for now'});
 });
 
-router.get('/_csrf', function* (next) {
-  json(this, {_csrf: 'some_value'});
-  yield next;
+app.get('/_csrf', function (req, resp) {
+  json(resp, {_csrf: 'some_value'});
 });
 
-router.post('/html', function* (next) {
-  this.set('Content-Type', 'text/html');
-  this.body = "<html><body>Some html.</body></html>";
-  yield next;
+app.post('/html', function (req, resp) {
+  resp.set('Content-Type', 'text/html');
+  resp.send( "<html><body>Some html.</body></html>" );
 });
 
-router.post('/404-html', function* (next) {
-  this.set('Content-Type', 'text/html');
-  this.response.status = 404;
-  this.body = "<p>Not found: " + this.request.url + "</p>";
-  yield next;
+app.post('/404-html', function (req, resp) {
+  resp
+  .set('Content-Type', 'text/html')
+  .status( 404 )
+  .send( "<p>Not found: " + req.originalUrl + "</p>" )
+  .end();
 });
 
-router.post("/string-as-html", function* (next) {
-  this.set('Content-Type', 'text/html');
-  this.body = ("Some invalid html.");
-  yield next;
+app.post("/string-as-html", function (req, resp) {
+  resp.set('Content-Type', 'text/html');
+  resp.send("Some invalid html.");
 });
 
-router.post("/text", function* (next) {
-  this.set('Content-Type', 'text/plain');
-  this.body = ("Some plain text.");
-  yield next;
+app.post("/text", function (req, resp) {
+  resp.set('Content-Type', 'text/plain');
+  resp.send("Some plain text.");
 });
 
-router.post("/json", function* (next) {
-  json(this, {msg: 'get smart'});
-  yield next;
+app.post("/json", function (req, resp) {
+  resp.send( json(resp, {msg: 'get smart'}) );
 });
 
-app.use(router.routes());
-app.use(router.allowedMethods());
-app.use(function* (next) {
-  if (!this.body) {
-    this.response.status = 404;
-    json(this, {msg: 'not found: ' + this.request.method + ' ' + this.request.url});
-  }
-  yield next;
+app.use(function (req, resp) {
+  resp
+  .status(404)
+  .send({msg: 'not found: ' + req.method + ' ' + req.originalUrl})
+  .end();
 });
 
 app.listen(port, function() {

@@ -1,6 +1,6 @@
 "use strict";
 /* jshint undef: true, unused: true */
-/* global Hogan, promise  */
+/* global Mustache, promise  */
 
 var Applet = function () {
   var i = this; // === this instance
@@ -308,7 +308,7 @@ var Applet = function () {
         id             : id,
         key            : data_key,
         html           : html,
-        mustache       : Hogan.compile(html),
+        mustache       : Mustache.parse(html),
         placeholder_id : placeholder_id,
         elements       : null,
         pos            : pos
@@ -324,7 +324,7 @@ var Applet = function () {
             meta.elements.remove();
           }
 
-          var html = $(meta.mustache.render(data));
+          var html = $(Mustache.render(meta.mustache, data));
           if (meta.pos === 'replace' || meta.pos === 'bottom')
             html.insertBefore($('#' + meta.placeholder_id));
           else
