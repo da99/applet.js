@@ -191,15 +191,8 @@ Sets id of element if no id is set. Uses `Applet.new_id`
 to help generate the id.
 
 ```javascript
-  Applet.dom_id( jquery_or_html_element )  -> "id_for_applet_0";
-  Applet.dom_id( 'prefix', jquery_or_html_element ) -> "prefix1";
-```
-
-"mark\_as\_compiled"
--------------------
-
-```javascript
-  Applet.mark_as_compiled("show_if", jquery_or_html_element);
+  Applet.dom_id( jquery_or_html_ele )           // -> "id_for_applet_0";
+  Applet.dom_id( 'prefix', jquery_or_html_ele ) // -> "prefix1";
 ```
 
 "find"
@@ -209,3 +202,14 @@ to help generate the id.
   Applet.find("show_if", '*[data-show_if]');
   Applet.find("show_if", '*[data-show_if]', $('.my_target'));
 ```
+
+"mark\_as\_compiled"
+-------------------
+
+```javascript
+  Applet.mark_as_compiled("show_if", jquery_or_html_ele);
+```
+
+Element won't show up in results using [`.find`](https://github.com/da99/applet.js#find).
+
+
