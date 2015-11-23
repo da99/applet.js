@@ -133,7 +133,7 @@ Javascript:
 ```javascript
 
   var my_response = function (meta) {
-    if (!(meta.name == 'ajax response' && meta.request.form_id != "my_id))
+    if (!(meta.name == 'ajax response' && meta.request.form_id != "my_id"))
       return;
 
     // Do more processing based on meta.request or meta.response.
