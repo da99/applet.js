@@ -170,15 +170,15 @@ var Applet = function () {
 
   Applet.key_compiled_for_applet = 'data-compiled_for_applet';
 
-  Applet.mark_as_compiled = function (arr, name) {
-    _.each(arr, function (raw_e) {
+  Applet.mark_as_compiled = function (name, unknown) {
+    _.each($(unknown), function (raw_e) {
       var e         = $(raw_e);
       var key       = Applet.key_compiled_for_applet;
       var old_value = e.attr(key) || '';
       e.attr(key, old_value + ' ' + name);
     }); // === each
 
-    return arr;
+    return unknown;
   }; // === func
 
   Applet.find = function (name, raw_selector, target) {
@@ -310,7 +310,7 @@ var Applet = function () {
       var id             = Applet.dom_id(t, 'mustache_templates_' + (data_key || ''));
       var pos            = 'replace';
 
-      Applet.mark_as_compiled(t, this_name);
+      Applet.mark_as_compiled(this_name, t);
 
       switch (_.trim(types[1])) {
         case 'mustache-top':
@@ -366,12 +366,12 @@ var Applet = function () {
 
     if (o.name !== 'dom') return;
 
-    var selector   = '*[data-show_if]';
-    var targets    = $(o.target || $('body')).find(selector).addBack(selector);
+    var targets    = Applet.find('show_if', '*[data-show_if]', o.target);
 
     _.each(targets, function (raw_node) {
       var node    = $(raw_node);
-      var the_key = Applet.remove_attr(raw_node, 'data-show_if');
+      var the_key = node.attr('data-show_if');
+      Applet.mark_as_compiled('show_if', node);
 
       if (!Applet.is_true(o.data_cache, the_key))
         node.hide();
@@ -403,12 +403,12 @@ var Applet = function () {
   Applet.funcs.hide_if = function (o) {
     if (o.name !== 'dom') return;
 
-    var selector   = '*[data-hide_if]';
-    var targets    = $(o.target || $('body')).find(selector).addBack(selector);
+    var targets = Applet.find('hide_if', '*[data-hide_if]', o.target);
 
     _.each(targets, function (raw_node) {
       var node = $(raw_node);
-      var key  = Applet.remove_attr(node, 'data-hide_if');
+      var key  = node.attr('data-hide_if');
+      Applet.mark_as_compiled('hide_if', node);
 
       if (Applet.is_true(o.data_cache, key) === true)
         node.hide();
@@ -509,8 +509,6 @@ var Applet = function () {
     if (o.name !== 'dom')
       return;
 
-    var selector = $('form:not(form.compiled) button.submit');
-    var target   = $(o.target || $('body')).find(selector).addBack(selector);
 
     if (!o.this_func.submit) {
       o.this_func.submit = function (a) {
@@ -542,9 +540,11 @@ var Applet = function () {
       };
     } // === if this_func
 
+    var targets = Applet.find('form', 'form button.submit', o.target);
     var i = 0;
-    while (target[i]) {
-      $(target[i]).on('click', o.this_func.submit(o.applet));
+    while (targets[i]) {
+      $(targets[i]).on('click', o.this_func.submit(o.applet));
+      Applet.mark_as_compiled('form', targets[i]);
       ++i;
     } // === while
   }; // === funcs: form
