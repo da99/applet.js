@@ -94,6 +94,7 @@ In your HTML, add `data-` attributes:
 
 In your script:
 ```
+  var my_app = new Applet( Applet.funcs.show_if );
    my_app.run("dom",  {"my_val?": false});
    my_app.run("data", {"my_val?": true});
 ```
@@ -111,8 +112,59 @@ In your HTML, add `data-` attributes:
 
 In your script:
 ```
-   my_app.run("dom",  {"my_val?": true});
-   my_app.run("data", {"my_val?": false});
+  var my_app = new Applet( Applet.funcs.hide_if );
+
+  my_app.run("dom",  {"my_val?": true});
+  my_app.run("data", {"my_val?": false});
 ```
 
+"form"
+------
 
+HTML:
+```HTML
+  <form id="my_id" action="....">
+     stuff...
+     <button class="submit">Tally ho!</button>
+  </form>
+```
+
+Javascript:
+```javascript
+
+  var my_response = function (meta) {
+    if (!(meta.name == 'ajax response' && meta.request.form_id != "my_id))
+      return;
+
+    // Do more processing based on meta.request or meta.response.
+  };
+
+  var my_app = new Applet(
+      Applet.funcs.ajax,
+      Applet.funcs.form,
+      my_response
+  );
+
+  my_app.run("dom");
+```
+
+"template"
+----------
+
+Your HTML:
+```HTML
+  <script type="text/mustache/my_name">
+     &lt;p&gt;  My content. &gt;p&lt;
+  </script>
+  // -- or --
+  <script type="text/mustache-bottom/my_name"> &lt;p&gt;  My content. &gt;p&lt; </script>
+  // -- or --
+  <script type="text/mustache-top/my_name"> &lt;p&gt;  My content. &gt;p&lt; </script>
+```
+
+Your Javascript:
+```javascript
+  var my_app = new Applet(Applet.funcs.template);
+  my_app.run("dom");
+  my_app.run("data", {my_name : {... my vals...} });
+```
