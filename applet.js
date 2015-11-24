@@ -12,19 +12,15 @@ var Applet = function () {
   var args    = _(arguments).toArray().flattenDeep().value();
 
   _.each(args, function (val) {
-    if (_.isString(val)) {
-      i.run(val);
-    } else {
-      if (_.isFunction(val)) {
-        i.new_func(val);
-      } else {
-        throw new Error(
-          "Not a function." +
-            "Only strings and functions allowed in constructor: " +
-              typeof(val) + " -> " + val
-        );
-      }
+    if (_.isFunction(val)) {
+      i.new_func(val);
+      return null;
     }
+
+    throw new Error(
+      "Only functions allowed in \"new Applet(...)\": " +
+        typeof(val) + " -> " + val
+    );
   });
 }; // === Applet constructor ===========================
 

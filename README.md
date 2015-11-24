@@ -50,7 +50,6 @@ Here is an example of using Applet.js:
 
     var my_app = new Applet(
       _.values(Applet.funcs), // === Optional: functions that come w/Applet.js.
-      "dom",                  // === You can also pass Strings here.
       my_func,                // === accepts a function.
       my_array_of_funcs       // === accepts an Array of functions.
     );
