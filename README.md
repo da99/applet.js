@@ -24,6 +24,7 @@ Don't use this. Instead use:
   * [Ractive](http://www.ractivejs.org/)
   * [RiotJS](https://muut.com/riotjs/)
   * [ReactJS](http://facebook.github.io/react/)
+  * [Elm](http://elm-lang.org)
 
 
 The Essence of Applet.js
