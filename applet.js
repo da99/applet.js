@@ -16,11 +16,6 @@ var Applet = function () {
       i.new_func(val);
       return null;
     }
-
-    throw new Error(
-      "Only functions allowed in \"new Applet(...)\": " +
-        typeof(val) + " -> " + val
-    );
   });
 }; // === Applet constructor ===========================
 
@@ -258,14 +253,13 @@ var Applet = function () {
   }; // === func
 
   Applet.prototype.new_func = function () {
-
     var arr = _.flatten(_.toArray(arguments));
     var i   = this;
 
     _.each(arr, function (f) {
 
       if (!_.isFunction(f))
-        throw new Error('Error: Not a function');
+        throw new Error('Error: Not a function: ' + f.toString());
 
       if (f({name : 'this position', applet: i}) === 'top')
         i.funcs.unshift(f);
